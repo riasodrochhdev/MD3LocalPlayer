@@ -1,12 +1,25 @@
 {
+ "id": "md3-local-player",
  "name": "Медиатека",
  "short_name": "Медиатека",
+ "description": "Музыкальный плеер в стиле Material You: локальные файлы, офлайн-режим, избранное и темы оформления.",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",
+ "display_override": [
+  "standalone",
+  "minimal-ui"
+ ],
+ "orientation": "any",
+ "dir": "ltr",
+ "lang": "ru",
+ "categories": [
+  "music",
+  "entertainment"
+ ],
  "background_color": "#201b23",
  "theme_color": "#201b23",
- "lang": "ru",
+ "prefer_related_applications": false,
  "icons": [
   {
    "src": "icon-192.png",
