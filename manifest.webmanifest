@@ -1,8 +1,8 @@
 {
  "id": "md3-local-player",
- "name": "Медиатека",
- "short_name": "Медиатека",
- "description": "Музыкальный плеер в стиле Material You: локальные файлы, офлайн-режим, избранное и темы оформления.",
+ "name": "MD3 Player",
+ "short_name": "MD3 Player",
+ "description": "Музыкальный плеер в стиле Material 3 Expressive: Youtube Music, локальные файлы, офлайн-режим, избранное и темы оформления.",
  "start_url": "./",
  "scope": "./",
  "display": "standalone",
