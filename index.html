@@ -386,6 +386,23 @@ html[data-glass=liquid] #nav .on{background:none;box-shadow:none;color:var(--tx)
  .mex input{width:80px}
  #toast{bottom:176px}
 }
+
+/* ---- v7: ползунок: волна до ползунка, прямая линия после, точка на конце ---- */
+:root{--wave:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='16'%3E%3Cpath d='M0 8Q7 0 14 8T28 8' fill='none' stroke='%23000' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");--flat:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='16'%3E%3Cpath d='M0 8H28' fill='none' stroke='%23000' stroke-width='4'/%3E%3C/svg%3E")}
+.wv{height:32px}
+.wtr{left:min(calc(var(--v) + 9px),calc(100% - 6px));background:color-mix(in srgb,var(--p) 38%,transparent)}
+.wtr::after{content:'';position:absolute;right:0;top:50%;width:6px;height:6px;margin-top:-3px;border-radius:50%;background:var(--p)}
+.wact{width:max(0px,calc(var(--v) - 7px))}
+.wpat{width:calc(100% + 28px);-webkit-mask:var(--flat) 0 50%/28px 16px repeat-x;mask:var(--flat) 0 50%/28px 16px repeat-x}
+.pl .wpat{-webkit-mask-image:var(--wave);mask-image:var(--wave);animation:wv2 .9s linear infinite}
+@keyframes wv2{to{transform:translateX(-28px)}}
+.wth{width:5px;height:28px;margin:-14px 0 0 -2.5px}
+.wv:active .wth{height:34px;margin-top:-17px}
+/* ---- v7: лента чипсов идёт до края экрана, без обрезки по отступу ---- */
+.chips{margin:24px calc(var(--px)*-1) 18px;padding:0 var(--px);scroll-padding-inline:var(--px)}
+/* ---- v7: вкладка «Настройки» ---- */
+#v-set #sbody{overflow:visible;margin:0;padding:0;flex:none!important}
+#v-set #stabs{margin:6px 0 16px}
 </style>
 </head>
 <body>
@@ -394,7 +411,6 @@ html[data-glass=liquid] #nav .on{background:none;box-shadow:none;color:var(--tx)
 <main>
  <section class="view on" id="v-home">
   <div class="top"><div class="av logo"><svg viewBox="0 0 48 48" aria-hidden="true"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--p)"/><stop offset="1" style="stop-color:var(--te)"/></linearGradient></defs><polygon points="48.0,24.0 47.8,25.2 47.2,26.4 46.3,27.5 45.4,28.5 44.6,29.5 44.1,30.5 43.9,31.7 44.0,32.9 44.1,34.3 44.2,35.7 44.0,37.0 43.4,38.1 42.5,39.0 41.3,39.6 40.0,40.0 38.6,40.3 37.4,40.6 36.4,41.1 35.6,41.9 34.9,42.9 34.3,44.1 33.5,45.3 32.5,46.3 31.4,46.9 30.2,47.0 28.8,46.8 27.5,46.3 26.3,45.8 25.1,45.3 24.0,45.2 22.9,45.3 21.7,45.8 20.5,46.3 19.2,46.8 17.8,47.0 16.6,46.9 15.5,46.3 14.5,45.3 13.7,44.1 13.1,42.9 12.4,41.9 11.6,41.1 10.6,40.6 9.4,40.3 8.0,40.0 6.7,39.6 5.5,39.0 4.6,38.1 4.0,37.0 3.8,35.7 3.9,34.3 4.0,32.9 4.1,31.7 3.9,30.5 3.4,29.5 2.6,28.5 1.7,27.5 0.8,26.4 0.2,25.2 -0.0,24.0 0.2,22.8 0.8,21.6 1.7,20.5 2.6,19.5 3.4,18.5 3.9,17.5 4.1,16.3 4.0,15.1 3.9,13.7 3.8,12.3 4.0,11.0 4.6,9.9 5.5,9.0 6.7,8.4 8.0,8.0 9.4,7.7 10.6,7.4 11.6,6.9 12.4,6.1 13.1,5.1 13.7,3.9 14.5,2.7 15.5,1.7 16.6,1.1 17.8,1.0 19.2,1.2 20.5,1.7 21.7,2.2 22.9,2.7 24.0,2.8 25.1,2.7 26.3,2.2 27.5,1.7 28.8,1.2 30.2,1.0 31.4,1.1 32.5,1.7 33.5,2.7 34.3,3.9 34.9,5.1 35.6,6.1 36.4,6.9 37.4,7.4 38.6,7.7 40.0,8.0 41.3,8.4 42.5,9.0 43.4,9.9 44.0,11.0 44.2,12.3 44.1,13.7 44.0,15.1 43.9,16.3 44.1,17.5 44.6,18.5 45.4,19.5 46.3,20.5 47.2,21.6 47.8,22.8" fill="url(#lg)"/><path transform="translate(24 24) scale(.95) translate(-12 -12)" style="fill:var(--onp)" d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg></div><h2 id="hi">MD3 Player</h2>
-   <button class="ib glass" data-act="theme" aria-label="Настройки" title="Настройки"><i data-i="tune"></i></button>
    <button class="ib glass" data-act="inst" aria-label="Установить приложение" title="Установить приложение" hidden><i data-i="inst"></i></button>
    <button class="ib glass" data-act="dir" aria-label="Добавить папку" title="Добавить папку"><i data-i="folder"></i></button>
    <button class="ib glass" data-act="add" aria-label="Добавить файлы" title="Добавить файлы"><i data-i="plus"></i></button></div>
@@ -410,7 +426,6 @@ html[data-glass=liquid] #nav .on{background:none;box-shadow:none;color:var(--tx)
  </section>
  <section class="view" id="v-lib">
   <div class="top"><h1 style="font-size:2.4rem;flex:1">Медиатека</h1>
-   <button class="ib glass" data-act="theme" aria-label="Настройки" title="Настройки"><i data-i="tune"></i></button>
    <button class="ib glass" data-act="dir" aria-label="Добавить папку"><i data-i="folder"></i></button>
    <button class="ib glass" data-act="add" aria-label="Добавить файлы"><i data-i="plus"></i></button></div>
   <div class="chips"><button class="chip on" data-tab="all">Все</button><button class="chip" data-tab="fav">Избранное</button><button class="chip" data-tab="artists">Артисты</button><button class="chip" data-tab="albums">Альбомы</button><button class="chip" data-tab="dl">Загрузки</button></div>
@@ -419,6 +434,7 @@ html[data-glass=liquid] #nav .on{background:none;box-shadow:none;color:var(--tx)
  </section>
 <section class="view" id="v-artist"><div id="artBody"></div></section>
 <footer class="sig">#вайбкод | riasodrochh made</footer>
+<section class="view" id="v-set"><div class="top"><h1 style="font-size:2.4rem;flex:1">Настройки</h1></div><div class="seg" id="stabs" role="tablist"><button data-st="look">Вид</button><button data-st="feed">Лента</button><button data-st="dl">Загрузки</button></div><div id="sbody"></div></section>
 </main>
 
 <div class="mini glass" id="mini" hidden>
@@ -438,6 +454,7 @@ html[data-glass=liquid] #nav .on{background:none;box-shadow:none;color:var(--tx)
  <button class="on" data-v="home"><i data-i="home"></i><span>Главная</span></button>
  <button data-v="search"><i data-i="search"></i><span>Поиск</span></button>
  <button data-v="lib"><i data-i="lib"></i><span>Медиатека</span></button>
+ <button data-v="set"><i data-i="tune"></i><span>Настройки</span></button>
 </nav>
 
 <div id="sheet" data-cs="0" role="dialog" aria-label="Плеер" aria-hidden="true">
@@ -448,7 +465,7 @@ html[data-glass=liquid] #nav .on{background:none;box-shadow:none;color:var(--tx)
  <div><div class="wv"><div class="wtr"></div><div class="wact"><div class="wpat"></div></div><i class="wth"></i><input class="seek" type="range" min="0" max="1000" value="0" aria-label="Перемотка"></div><div class="srow"><time class="cur">0:00</time><time class="tot">0:00</time></div></div>
  <div class="ctl"><button class="ib" data-act="shuf" aria-label="Перемешать"><i data-i="shuffle"></i></button><button class="ib" data-act="prev" aria-label="Предыдущий"><i data-i="prev"></i></button><button class="pb hp" data-act="play" aria-label="Играть или пауза"></button><button class="ib" data-act="next" aria-label="Следующий"><i data-i="next"></i></button><button class="ib" data-act="rep" aria-label="Повтор"><i data-i="repeat"></i></button></div>
 </div>
-<div id="tp" hidden><div class="glass tpc" role="dialog" aria-label="Настройки"><div class="tph"><h2>Настройки</h2><button class="ib" data-act="tclose" aria-label="Закрыть"><i data-i="x"></i></button></div><div class="seg" id="stabs" role="tablist"><button data-st="look">Вид</button><button data-st="feed">Лента</button><button data-st="dl">Загрузки</button></div><div id="sbody"></div><button class="btn full" data-act="tclose" style="margin-top:16px">Готово</button></div></div>
+<div id="tp" hidden></div>
 <div id="ytbox" class="glass" hidden><div id="ytp"></div><p id="yterr" hidden>Видео не открылось. Оно может быть недоступно для встраивания, а страница должна быть открыта по http(s), не из файла.</p></div>
 <div id="toast" role="status"></div>
 <input type="file" id="f" accept="audio/*,.mp3,.m4a,.flac,.wav,.ogg,.opus,.aac" multiple hidden>
@@ -610,6 +627,8 @@ setInterval(()=>{if(!cfg.rauto||document.hidden)return;const r=$('#rrail');if(!r
 const DB=new Promise(r=>{try{const q=indexedDB.open('mp',1);q.onupgradeneeded=()=>q.result.createObjectStore('f');q.onsuccess=()=>r(q.result);q.onerror=()=>r(null)}catch(e){r(null)}});
 const idb=(mode,fn)=>DB.then(d=>d?new Promise(res=>{const tx=d.transaction('f',mode),r=fn(tx.objectStore('f'));tx.oncomplete=()=>res(r&&r.result);tx.onerror=tx.onabort=()=>res()}):null);
 const hue=t=>270+[...t.title].reduce((h,c)=>h+c.charCodeAt(0),0)%80;
+const artC=new Map();
+function genArt(t){const h=hue(t);if(artC.has(h))return artC.get(h);const c=document.createElement('canvas');c.width=c.height=512;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,512,512);g.addColorStop(0,`hsl(${h} 42% 40%)`);g.addColorStop(1,`hsl(${(h+45)%360} 48% 22%)`);x.fillStyle=g;x.fillRect(0,0,512,512);x.fillStyle='rgba(255,255,255,.9)';x.beginPath();x.ellipse(195,370,56,42,-.35,0,7);x.fill();x.fillRect(236,130,28,240);x.beginPath();x.moveTo(264,130);x.quadraticCurveTo(360,160,336,265);x.quadraticCurveTo(320,215,264,205);x.fill();const u=c.toDataURL('image/png');artC.set(h,u);return u}
 const cv=(t,c='')=>t.yt||t.cover?`<img class="cv ${c}" src="${t.cover?esc(t.cover):'https://i.ytimg.com/vi/'+t.yt+'/mqdefault.jpg'}" alt="" style="object-fit:cover">`:`<span class="cv ${c}" style="--h:${hue(t)}">${ic('note')}</span>`;
 const empty=(h,p)=>`<div class="empty">${ic('note')}<h3>${h}</h3><p>${p}</p><button class="btn" data-act="add">Добавить файлы</button></div>`;
 const row=t=>`<div class="row${curT()===t?' now':''}" data-id="${t.id}" tabindex="0" role="button">${cv(t)}<span class="mt"><b>${esc(t.title)}</b><small>${al(t)}</small></span>${dlb(t)}<button class="ib fav${favs.has(t.key)?' on':''}" data-fav="${t.id}" aria-label="Добавить в избранное">${ic('fav')}</button><time>${t.dur?fmt(t.dur):''}</time></div>`;
@@ -632,7 +651,7 @@ function add(fl,alb){let n=0;for(const f of fl){
  T.push(t);n++;meta(t)}
  if(n)render()}
 
-function render(){const v=($('.view.on')||{id:'v-home'}).id.slice(2);v==='home'?rh():v==='lib'?rl():v==='artist'?ra():rs();$('#cnt').textContent=T.length?`${T.length} ${pl(T.length)}, хранятся на устройстве и доступны офлайн`:'Выберите аудиофайлы или папку'}
+function render(){const v=($('.view.on')||{id:'v-home'}).id.slice(2);v==='home'?rh():v==='lib'?rl():v==='artist'?ra():v==='set'?(document.activeElement&&$('#sbody').contains(document.activeElement)||renderSettings()):rs();$('#cnt').textContent=T.length?`${T.length} ${pl(T.length)}, хранятся на устройстве и доступны офлайн`:'Выберите аудиофайлы или папку'}
 function hsub(){const t=curT()||T[0]||rcL[0],e=$('#hsub');if(e)e.textContent=t?(noArt.test(t.artist)?t.title:t.artist+' - '+t.title):'Музыки пока нет'}
 function rh(){recs();hsub();markRec(1);
  const r=played.map(byId).filter(Boolean),f=T.filter(t=>favs.has(t.key));
@@ -659,7 +678,7 @@ function load(){const t=curT();if(!t)return;yDone=0;a.pause();Y&&Y.pauseVideo&&Y
  if(t.yt)ytLoad(()=>{if(curT()===t)Y.loadVideoById(t.yt)});
  else{const go=u=>{if(curT()===t){a.src=u;a.play().catch(()=>{})}};t.au?auUrl(t.au).then(go):go(t.url)}
  played=[t.id,...played.filter(x=>x!==t.id)].slice(0,12);taste(t,1);ui();if(mixOn&&Q.length-cur<4)mixFill();if(recQ&&Q.length-cur<4)recMore();
- if('mediaSession'in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:t.title,artist:t.artist,album:t.album,artwork:t.yt||t.cover?[{src:t.cover||'https://i.ytimg.com/vi/'+t.yt+'/hqdefault.jpg',sizes:'480x360'}]:[]})}}
+ if('mediaSession'in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:t.title,artist:t.artist,album:t.album,artwork:[{src:t.cover||(t.yt?'https://i.ytimg.com/vi/'+t.yt+'/hqdefault.jpg':genArt(t)),sizes:t.cover||!t.yt?'512x512':'480x360'}]})}}
 function step(d,auto){if(!Q.length)return;let n=cur+d;
  if(shuf&&d>0&&Q.length>1){do n=Math.random()*Q.length|0;while(n===cur)}
  else if(n>=Q.length){if(mixOn){mixFill().then(()=>{if(Q.length>cur+1)step(d,auto)});return}if(recQ){recMore().then(()=>{if(Q.length>cur+1)step(d,auto)});return}if(auto&&!rep){E.pause();E.currentTime=0;return}n=0}else if(n<0)n=Q.length-1;
@@ -683,7 +702,7 @@ $$('.seek').forEach(r=>r.oninput=()=>{if(E.duration)E.currentTime=r.value/1000*E
 $$('.vol').forEach(r=>r.oninput=()=>{a.volume=yA.volume=r.value/100;r.style.setProperty('--v',r.value+'%')});
 if('mediaSession'in navigator){const m=navigator.mediaSession;m.setActionHandler('play',()=>E.play());m.setActionHandler('pause',()=>E.pause());m.setActionHandler('nexttrack',()=>step(1));m.setActionHandler('previoustrack',()=>step(-1))}
 
-const A={mix,recs:()=>recs(1),cshape:()=>{const e=$('#sheet'),n=(+e.dataset.cs+1)%3;e.dataset.cs=n;ls.set('cs',n)},motion:()=>setMotion(document.documentElement.dataset.motion==='full'?'system':'full'),inst:()=>{ip&&ip.prompt()},theme:()=>{renderSettings();$('#tp').hidden=0;if(!(history.state&&history.state.k==='t'))try{history.pushState({k:'t'},'')}catch{}},tclose:()=>{history.state&&history.state.k==='t'?history.back():closeTp()},
+const A={mix,recs:()=>recs(1),cshape:()=>{const e=$('#sheet'),n=(+e.dataset.cs+1)%3;e.dataset.cs=n;ls.set('cs',n)},motion:()=>setMotion(document.documentElement.dataset.motion==='full'?'system':'full'),inst:()=>{ip&&ip.prompt()},theme:()=>go('set'),tclose:()=>{history.state&&history.state.k==='t'?history.back():closeTp()},
  sx:()=>{const v=prompt('Адрес вашего Cloudflare Worker (https://….workers.dev). Пусто: отключить.',ls.get('sx',''));if(v!==null){ls.set('sx',v.trim());const q=$('#q').value.trim();q&&ysearch(q)}},
  pipe:()=>{const v=prompt('Адрес сервера Piped API (например https://pipedapi.example.org). Пусто — по умолчанию:',ls.get('pipe',''));if(v!==null){ls.set('pipe',v.trim());const q=$('#q').value.trim();q&&ysearch(q)}},
  yadd:()=>{const i=$('#yl'),id=yid(i.value.trim());if(!id){i.value='';i.placeholder='Это не ссылка на YouTube';return}i.value='';addYt(id,'','',1)},
@@ -698,7 +717,7 @@ const A={mix,recs:()=>recs(1),cshape:()=>{const e=$('#sheet'),n=(+e.dataset.cs+1
  back:()=>{grp=null;rl()},open:()=>{if($('#sheet').classList.contains('open'))return;sheet(1);try{history.pushState({k:'s'},'')}catch{}},close:()=>{history.state&&history.state.k==='s'?history.back():sheet(0)},
  clearq:()=>{recent=[];ls.set('q',recent);rs()},
  shufall:()=>{const ids=$$('#libList [data-id]').map(e=>+e.dataset.id);if(ids.length){shuf=true;play(ids[Math.random()*ids.length|0],ids)}}};
-function go(v,force){const n=$('#v-'+v);if(n.classList.contains('on')&&!force)return;$$('.view').forEach(s=>s.classList.toggle('on',s===n));if(v!=='artist')navV=v;render();
+function go(v,force){const n=$('#v-'+v);if(n.classList.contains('on')&&!force)return;$$('.view').forEach(s=>s.classList.toggle('on',s===n));if(v!=='artist')navV=v;if(rcStale&&v!=='set'){rcStale=0;recs(1)}render();
  $$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===navV));np();scrollTo(0,0)}
 document.addEventListener('click',e=>{if(e.target.id==='tp')return A.tclose();const b=e.target.closest('[data-act],[data-fav],[data-v],[data-tab],[data-g],[data-q],[data-id],[data-yt],[data-th],[data-del],[data-au],[data-gl],[data-st],[data-cf],[data-tg],[data-cadd],[data-crm],[data-gn],[data-dl],[data-artist]');if(!b)return;const d=b.dataset;
  if(d.fav){const t=byId(+d.fav);t&&toggleFav(t.key)}
@@ -901,6 +920,9 @@ document.addEventListener('pointerdown',e=>{if(document.documentElement.dataset.
  const r=g.getBoundingClientRect();g.style.setProperty('--mx',e.clientX-r.left+'px');g.style.setProperty('--my',e.clientY-r.top+'px');g.classList.add('tch');
  const off=()=>{g.classList.remove('tch');removeEventListener('pointerup',off,true);removeEventListener('pointercancel',off,true)};addEventListener('pointerup',off,true);addEventListener('pointercancel',off,true)},true);
 /* положение «капли» под активной вкладкой считаем по итоговым размерам кнопок */
+(()=>{let x0=0,y0=0,t0=0,ok=0;
+ addEventListener('touchstart',e=>{const t=e.touches[0];x0=t.clientX;y0=t.clientY;t0=Date.now();ok=e.touches.length===1&&x0>28&&x0<innerWidth-28&&!$('#sheet').classList.contains('open')&&!$('#v-artist').classList.contains('on')&&!(e.target.closest&&e.target.closest('.chips,.rail,input,textarea,select,.seg,.wv,#nav,.mini,#ytbox,.tgl'))},{passive:true});
+ addEventListener('touchend',e=>{if(!ok)return;ok=0;const t=e.changedTouches[0],dx=t.clientX-x0,dy=t.clientY-y0;if(Math.abs(dx)<70||Math.abs(dx)<Math.abs(dy)*1.6||Date.now()-t0>600)return;const v=[...$$('#nav [data-v]')].map(b=>b.dataset.v),n=v[v.indexOf(navV)+(dx<0?1:-1)];if(n)go(n)},{passive:true})})();
 function np(first){const n=$('#nav'),p=n&&n.querySelector('.np');if(!p)return;const bs=[...n.querySelectorAll('button')],i=bs.findIndex(b=>b.classList.contains('on'));if(i<0)return;
  const wOf=(b,on)=>{const c=getComputedStyle(b),s=b.querySelector('span');return Math.max(parseFloat(c.minWidth)||0,(parseFloat(c.paddingLeft)||0)*2+24+(parseFloat(c.columnGap)||8)+(on&&s?Math.min(s.scrollWidth,120):0))};
  const cs=getComputedStyle(n),gp=parseFloat(cs.columnGap)||4;let x=parseFloat(cs.paddingLeft)||8;for(let k=0;k<i;k++)x+=wOf(bs[k],0)+gp;
