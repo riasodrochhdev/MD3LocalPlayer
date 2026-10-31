@@ -1,68 +1,22 @@
-# Медиатека (MD3 Player)
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-Музыкальный плеер в стиле Material 3 Expressive, который работает прямо в браузере и ставится на телефон как приложение (пока PWA). Играет твои локальные файлы офлайн, ищет музыку онлайн и подбирает рекомендации по тому, что ты слушаешь.
+# Run and deploy your AI Studio app
 
-> #вайбкод | riasodrochh made
+This contains everything you need to run your app locally.
 
-## Возможности
+View your app in AI Studio: https://ai.studio/apps/5b7fdaf6-a6f7-4818-aa0b-131a10aa800e
 
-**Своя музыка**
-- Добавление файлов и целых папок (mp3, m4a, flac, wav, ogg, opus, aac)
-- Файлы хранятся на устройстве (IndexedDB) и играют без интернета
-- Метаданные берутся из имени файла (`Исполнитель - Название`) и названия папки
-- Библиотека с вкладками: все треки, избранное, артисты, альбомы
+## Run Locally
 
-**Онлайн**
-- Поиск и воспроизведение треков YouTube по запросу или ссылке
-- Каталог Audius: поиск и прослушивание через обычный аудиоплеер
-- Если видео на YouTube не открывается, плеер ищет замену: сначала в Audius, потом другую загрузку на YouTube, и только потом пропускает трек
+**Prerequisites:**  [Android Studio](https://developer.android.com/studio)
 
-**Рекомендации**
-- Блок «Рекомендации» на главной строится по лайкам и прослушиваниям (артисты и жанры)
-- «Мой микс» — бесконечная очередь, которая сама подгружает похожие треки
 
-**Интерфейс**
-- Три режима стекла: без размытия, размытие, Liquid Glass
-- 9 тем: Фиалка, Роза, Океан, Мята, Закат, AMOLED, Моно, Моно AMOLED, Светлая
-- Анимированная док-капсула навигации на телефоне и на ПК
-- Мини-плеер и полноэкранный плеер со свайпом обложек, волнистой перемоткой и тремя формами обложки
-- Управление с экрана блокировки и медиаклавиш (Media Session)
-- Drag & drop файлов в окно на ПК
-
-## Установка и запуск
-
-Это статический сайт, сборка не нужна.
-
-1. Форкни или склонируй репозиторий.
-2. Включи GitHub Pages: **Settings → Pages → Deploy from a branch → main / root**.
-3. Открой адрес сайта. В браузере на телефоне выбери «Установить приложение» или «Добавить на главный экран».
-
-Локально: любой статический сервер, например `python3 -m http.server`. Открывать `index.html` напрямую из файла нельзя: сервис-воркер и YouTube работают только по `http(s)`.
-
-## Структура
-
-| Файл | Назначение |
-| --- | --- |
-| `index.html` | Всё приложение: разметка, стили, логика |
-| `sw.js` | Сервис-воркер: офлайн-кэш (версия кэша `mp-v5`) |
-| `manifest.webmanifest` | Манифест PWA |
-| `icon-192.png`, `icon-512.png` | Иконки приложения |
-
-При обновлении приложения поднимай версию кэша в `sw.js` (`const C='mp-v5'`), чтобы у пользователей подтянулась новая версия.
-
-## Настройка поиска YouTube
-
-Поиск идёт через публичные серверы Piped, они иногда недоступны. Если поиск не работает, в приложении есть два запасных варианта:
-
-- **Свой Cloudflare Worker** — прокси для поиска, адрес вставляется в настройках поиска.
-- **Ключ YouTube Data API v3** — хранится только в твоём браузере.
-
-## Ограничения
-
-- YouTube и Audius требуют интернета, а в некоторых сетях YouTube может быть недоступен.
-- Некоторые видео нельзя встроить или они ограничены по возрасту. Приложение не обходит эти ограничения, а подбирает замену или пропускает трек.
-- Скачивания музыки с YouTube в приложении нет. Офлайн работают только твои собственные файлы.
-
-## Дисклеймер
-
-Проект не связан с YouTube, Google или Audius. Используй его для личного прослушивания и соблюдай условия сервисов и авторские права.
+1. Open Android Studio
+2. Select **Open** and choose the directory containing this project
+3. Allow Android Studio to fix any incompatibilities as it imports the project.
+4. Create a file named `.env` in the project directory and set `GEMINI_API_KEY` in that file to your Gemini API key (see `.env.example` for an example)
+5. Remove this line from the app's `build.gradle.kts` file: `signingConfig = signingConfigs.getByName("debugConfig")`
+6. Run the app on an emulator or physical device
+7. If you have already published your app in AI Studio, please [request upload key reset](https://support.google.com/googleplay/android-developer/answer/9842756#zippy=%2Crequest-an-upload-key-reset) in Google Play Console.

@@ -1,0 +1,6 @@
+{
+  "name": "Медиатека",
+  "description": "Стильный нативный плеер в дизайне Material 3 Expressive с темами оформления, навигацией и коллекциями",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
