@@ -877,7 +877,9 @@ function ui(){const t=curT(),pa=!E.paused&&!!t;if(t!==ui.l){ui.l=t;drawCar(cdir)
  $$('[data-act=fav]').forEach(b=>b.classList.toggle('on',!!t&&favs.has(t.key)));
  $$('[data-act=shuf]').forEach(b=>b.classList.toggle('on',shuf));
  $$('[data-act=rep]').forEach(b=>{b.classList.toggle('on',rep>0);b.dataset.s=rep});paintDl()}
-let yDone=0;const ended=()=>{if(E===yA){if(yDone)return;yDone=1}rep===2?(E.currentTime=0,E.play(),yDone=0):step(1,true)};a.onplay=a.onpause=ui;a.onended=ended;a.onerror=()=>{const t=curT();if(t&&t.ym&&!t.px){t.px=1;a.src=ymStream(t.ym);a.play().catch(()=>{});return}if(t&&(t.au||t.ym||t.sc||t.sp)){toast((t.ym?'Трек Яндекса':t.sc||t.sp?'Трек SoundCloud':'Трек Audius')+' не загрузился. Пропускаю');setTimeout(()=>step(1,true),800)}};
+let yDone=0;const ended=()=>{if(E===yA){if(yDone)return;yDone=1}rep===2?(E.currentTime=0,E.play(),yDone=0):step(1,true)};a.onplay=a.onpause=ui;a.onended=ended;a.onerror=()=>{const t=curT();if(t&&t.ym&&!t.px){t.px=1;a.src=ymStream(t.ym);a.play().catch(()=>{});return}if(t&&(t.sc||t.sp)&&t.scx&&!t.px){t.px=1;a.src=t.scx;a.play().catch(()=>{});return}
+ if(t&&(t.sc||t.sp)){scBad('Трек SoundCloud не загрузился (код '+(a.error?a.error.code:'?')+')');return}
+ if(t&&(t.au||t.ym)){toast((t.ym?'Трек Яндекса':'Трек Audius')+' не загрузился. Пропускаю');setTimeout(()=>step(1,true),800)}};
 const SK=$$('.seek'),CU=$$('.cur'),TO=$$('.tot'),FL=$('#mini>.fill');let sk=0,lt='';
 SK.forEach(r=>{r.addEventListener('pointerdown',()=>sk=1);r.addEventListener('change',()=>sk=0)});addEventListener('pointerup',()=>sk=0);
 const tick=()=>{const d=E.duration,c=E.currentTime,p=d?c/d:0;FL.style.transform='scaleX('+p+')';
@@ -1314,10 +1316,12 @@ async function scJ(p){const r=await fetch(scBase()+p),j=await r.json().catch(()=
 const scMapT=x=>({sc:String(x.id),title:x.title,artist:x.artist,dur:x.dur,cover:x.cover}),scR=()=>scOn()&&cfg.rsc;
 const scSearch=async q=>(await scJ('/sc/search?q='+encodeURIComponent(q))).map(scMapT),scReco=async id=>(await scJ('/sc/reco?id='+encodeURIComponent(id||''))).map(scMapT);
 async function scResolve(t){const l=await scSearch(t.artist+' '+t.title);if(!l.length)throw new Error('нет на SoundCloud');const b=l.find(x=>!t.dur||Math.abs(x.dur-t.dur)<=10)||l[0];return t.scm=b.sc}
+let scFail=0;a.addEventListener('playing',()=>{scFail=0});
+function scBad(m){if(++scFail>2){scFail=0;a.pause();toast(m+'. Остановился после 3 ошибок подряд')}else{toast(m+'. Пропускаю');setTimeout(()=>step(1,true),900)}}
 async function scPlay(t,go){try{const j=await scJ('/sc/url?id='+(t.sc||t.scm||await scResolve(t)));if(curT()!==t)return;
  if(hls){try{hls.destroy()}catch{}hls=null}
- if(j.hls){await hlsLoad();if(curT()!==t)return;if(window.Hls&&Hls.isSupported()){hls=new Hls();hls.loadSource(j.url);hls.attachMedia(a);hls.on(Hls.Events.MANIFEST_PARSED,()=>a.play().catch(()=>{}));hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal&&curT()===t){toast('Трек SoundCloud не загрузился. Пропускаю');setTimeout(()=>step(1,true),800)}});return}}
- go(j.url)}catch(e){toast(t.sp?'Не нашёл этот трек Spotify на SoundCloud. Пропускаю':'SoundCloud не отвечает. Проверьте шлюз');setTimeout(()=>step(1,true),900)}}
+ if(j.hls){await hlsLoad();if(curT()!==t)return;if(window.Hls&&Hls.isSupported()){hls=new Hls();hls.loadSource(j.url);hls.attachMedia(a);hls.on(Hls.Events.MANIFEST_PARSED,()=>a.play().catch(()=>{}));hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal&&curT()===t)scBad('SoundCloud HLS: '+d.details)});return}}
+ t.scx=j.proxy||'';t.px=0;go(j.url)}catch(e){if(curT()===t)scBad(t.sp&&/нет на SoundCloud/.test(e.message)?'Не нашёл этот трек Spotify на SoundCloud':'SoundCloud: '+(e.message||'ошибка'))}}
 const SPR=()=>location.origin+location.pathname,spOn=()=>!!(cfg.spId&&cfg.spTok&&cfg.spTok.r);
 async function spLogin(){const v=[...crypto.getRandomValues(new Uint8Array(64))].map(b=>'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[b%62]).join('');
  const c=btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v))))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
