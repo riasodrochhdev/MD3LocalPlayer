@@ -25,6 +25,14 @@ async function scGet(path, q = {}) {
   }
 }
 
+async function scGetUrl(url, q = {}) {
+  for (const f of [0, 1]) {
+    const t = new URL(url);
+    for (const [k, v] of Object.entries({ ...q, client_id: await scId(f) })) t.searchParams.set(k, v);
+    const r = await fetch(t, { headers: { 'User-Agent': BUA } });
+    if (r.ok || f) return r;
+  }
+}
 const scOk = x => x && x.title && x.policy !== 'SNIP' && x.policy !== 'BLOCK' && x.media && x.media.transcodings && x.media.transcodings.length;
 const scMap = x => ({
   id: x.id, title: x.title, artist: (x.user && x.user.username) || 'SoundCloud',
@@ -74,17 +82,21 @@ export default {
         let r = await scGet('/tracks/' + id), x = r.ok ? await r.json().catch(() => null) : null;
         if (!x) { r = await scGet('/tracks', { ids: id }); const l = r.ok ? await r.json().catch(() => []) : []; x = l[0]; }
         if (!x) return J({ error: 'трек не найден (SoundCloud ' + r.status + ')' }, 502);
-        const tc = (x.media && x.media.transcodings) || [];
-        // hls.js не умеет ogg/opus, поэтому из HLS берём mp3, затем aac
-        const hl = tc.filter(t => t.format.protocol === 'hls'), mt = t => (t.format.mime_type || '');
-        const pick = tc.find(t => t.format.protocol === 'progressive') || hl.find(t => /mpeg/.test(mt(t))) || hl.find(t => /mp4a/.test(mt(t))) || hl[0];
-        if (!pick) return J({ error: 'нет потока' }, 404);
-        const s = await scGet(pick.url.replace('https://api-v2.soundcloud.com', ''), { track_authorization: x.track_authorization || '' });
-        const d = await s.json().catch(() => ({}));
-        const hls = pick.format.protocol === 'hls';
-        if (!d.url) return J({ error: 'нет ссылки на поток (SoundCloud ' + s.status + ')' }, 502);
-        const prx = u.origin + '/sc/' + (hls ? 'h' : 'p') + '?u=' + encodeURIComponent(d.url);
-        return J({ url: hls ? prx : d.url, proxy: prx, hls });
+        const tc = (x.media && x.media.transcodings) || [], ft = t => t.format || {}, mt = t => ft(t).mime_type || '';
+        // порядок: progressive, затем HLS mp3 и aac (hls.js не умеет ogg/opus)
+        const order = [...tc.filter(t => ft(t).protocol === 'progressive'), ...tc.filter(t => ft(t).protocol === 'hls' && /mpeg/.test(mt(t))), ...tc.filter(t => ft(t).protocol === 'hls' && /mp4a/.test(mt(t)))];
+        if (!order.length) return J({ error: 'нет подходящего формата потока (' + tc.map(t => ft(t).protocol + ' ' + mt(t)).join(', ') + ')' }, 404);
+        let last = '';
+        for (const t of order) {
+          const s = await scGetUrl(t.url, { track_authorization: x.track_authorization || '' }), txt = await s.text();
+          let j = {}; try { j = JSON.parse(txt); } catch {}
+          if (j.url) {
+            const hls = ft(t).protocol === 'hls', prx = u.origin + '/sc/' + (hls ? 'h' : 'p') + '?u=' + encodeURIComponent(j.url);
+            return J({ url: hls ? prx : j.url, proxy: prx, hls, mime: mt(t) });
+          }
+          last = s.status + ' ' + new URL(t.url).host + ' ' + txt.slice(0, 80);
+        }
+        return J({ error: 'нет ссылки на поток (' + last + ')' }, 502);
       }
       return J({ error: 'not found' }, 404);
     } catch (e) {
