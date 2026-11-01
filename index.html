@@ -630,7 +630,7 @@ async function ykeySearch(q){const k=ls.get('ykey',''),o=$('#ytres');if(!q){o.in
   o.innerHTML='<div class="sh"><h2>YouTube</h2></div><div class="list">'+(j.items.map(i=>`<div class="row" data-yt="${i.id.videoId}" data-t="${esc(i.snippet.title)}" data-c="${esc(i.snippet.channelTitle)}" tabindex="0" role="button"><img class="cv" src="${i.snippet.thumbnails.default.url}" alt="" style="object-fit:cover"><span class="mt"><b>${esc(i.snippet.title)}</b><small>${esc(i.snippet.channelTitle)}</small></span></div>`).join('')||'<p class="hsub">Ничего не найдено</p>')+'</div>'}
  catch{o.innerHTML='<p class="hsub">Поиск не удался: проверьте ключ и дневную квоту.</p>'}}
 /* ---- сохранение онлайн-треков (YouTube/Audius): без этого лайки на них терялись после перезахода ---- */
-const saveWeb=()=>ls.set('web',T.filter(t=>t.yt||t.au||t.ym||t.vk).map(t=>({key:t.key,yt:t.yt,au:t.au,ym:t.ym,vk:t.vk,ya:t.ya,title:t.title,artist:t.artist,album:t.album,dur:t.dur,cover:t.cover,g:t.g,aa:t.aa,ah:t.ah})));
+const saveWeb=()=>ls.set('web',T.filter(t=>t.yt||t.au||t.ym||t.vk||t.sc||t.sp).map(t=>({key:t.key,yt:t.yt,au:t.au,ym:t.ym,vk:t.vk,sc:t.sc,sp:t.sp,ya:t.ya,title:t.title,artist:t.artist,album:t.album,dur:t.dur,cover:t.cover,g:t.g,aa:t.aa,ah:t.ah})));
 /* ---- Audius: бесплатный каталог, играет через обычный <audio>, без ключей и без видимого плеера ---- */
 let auH;const H=async()=>auH||(auH=await fetch('https://api.audius.co').then(r=>r.json()).then(j=>j.data[Math.random()*j.data.length|0]).catch(()=>'https://discoveryprovider.audius.co'));
 const auUrl=id=>H().then(h=>h+'/v1/tracks/'+id+'/stream?app_name=MD3Player');
@@ -639,9 +639,11 @@ const auGet=async p=>{try{const h=await H(),r=await fetch(h+'/v1/tracks/'+p+(p.i
 const auSearch=(q,n=12)=>auGet('search?limit='+n+'&query='+encodeURIComponent(q)),auTrend=g=>auGet('trending?time=week&limit=20'+(g?'&genre='+encodeURIComponent(g):''));
 function addAu(o,go){let t=T.find(x=>x.key==='au:'+o.au);if(!t){t=X.find(x=>x.key==='au:'+o.au);if(t)X=X.filter(x=>x!==t);else t={id:++uid,key:'au:'+o.au,album:'Audius',...o};T.push(t);saveWeb()}render();if(go)play(t.id)}
 async function asearch(q){const o=$('#aures');if(!q){o.innerHTML='';return}
- const [r,us,ym,ya,vk]=await Promise.all([auSearch(q),auUsers(q),ymOn()?ymSearch(q).catch(()=>[]):[],ymOn()?ymSearchArtists(q).catch(()=>[]):[],vkOn()?vkSearch(q).catch(()=>[]):[]]);if($('#q').value.trim()!==q)return;
+ const [r,us,ym,ya,vk,sc,sp]=await Promise.all([auSearch(q),auUsers(q),ymOn()?ymSearch(q).catch(()=>[]):[],ymOn()?ymSearchArtists(q).catch(()=>[]):[],vkOn()?vkSearch(q).catch(()=>[]):[],scOn()?scSearch(q).catch(()=>[]):[],spOn()&&scOn()?spSearch(q).catch(()=>[]):[]]);if($('#q').value.trim()!==q)return;
  const ua=[...ya.slice(0,6).map(a=>({yid:a.id,name:a.name,pic:a.pic})),...us.filter(u=>u.name).slice(0,6)];
  o.innerHTML=(ua.length?'<div class="sh"><h2>Исполнители</h2></div><div class="rail relr">'+ua.map(relB).join('')+'</div>':'')+
+  (sc.length?'<div class="sh"><h2>SoundCloud</h2></div><div class="list" data-ctx>'+sc.map(i=>row(ensure(i))).join('')+'</div>':'')+
+  (sp.length?'<div class="sh"><h2>Spotify</h2></div><div class="list" data-ctx>'+sp.map(i=>row(ensure(i))).join('')+'</div>':'')+
   (vk.length?'<div class="sh"><h2>VK Музыка</h2></div><div class="list" data-ctx>'+vk.map(i=>row(ensure(i))).join('')+'</div>':'')+
   (ym.length?'<div class="sh"><h2>Яндекс Музыка</h2></div><div class="list" data-ctx>'+ym.map(i=>row(ensure(i))).join('')+'</div>':'')+
   (r.length?'<div class="sh"><h2>Audius</h2></div><div class="list">'+r.map(i=>`<div class="row" data-au="${esc(i.au)}" data-o="${esc(JSON.stringify(i))}" tabindex="0" role="button">${cv(i)}<span class="mt"><b>${esc(i.title)}</b><small>${al(i)}</small></span><time>${i.dur>0?fmt(i.dur):''}</time></div>`).join('')+'</div>':'')}
@@ -652,7 +654,7 @@ async function mix(){toast('Собираю микс…');mixOn=1;recQ=0;waveOn=0
 /* ---- рекомендации v7: лента строится по избранному ---- */
 let rcL=[],rcBusy=0,rcTried=0,recQ=0,recBusy=0,rcd=0,rcStale=0,rTouch=0;
 const rseen=new Set(ls.get('rseen',[]));
-const rk=o=>o.vk?'vk:'+o.vk:o.au?'au:'+o.au:o.ym?'ym:'+o.ym:'yt:'+o.yt;
+const rk=o=>o.sc?'sc:'+o.sc:o.sp?'sp:'+o.sp:o.vk?'vk:'+o.vk:o.au?'au:'+o.au:o.ym?'ym:'+o.ym:'yt:'+o.yt;
 const pic=u=>u&&u.profile_picture&&(u.profile_picture['480x480']||u.profile_picture['150x150']||u.profile_picture['1000x1000'])||'';
 const auJ=async p=>{try{const h=await H(),r=await fetch(h+'/v1/'+p+(p.includes('?')?'&':'?')+'app_name=MD3Player');return(await r.json()).data}catch{return null}};
 const auUsers=q=>auJ('users/search?limit=8&query='+encodeURIComponent(q)).then(d=>Array.isArray(d)?d:[]);
@@ -668,7 +670,7 @@ async function auSeed(name,rel){const u=await auFind(name);if(!u)return{own:[],m
 /* трек из сети -> объект в памяти (в библиотеку попадает после «+» или скачивания) */
 function ensure(o){const k=rk(o);let t=T.find(x=>x.key===k)||X.find(x=>x.key===k);
  if(t&&o.cover&&(o.ym||o.vk)&&t.cover!==o.cover)t.cover=o.cover;
- if(!t){t=o.vk?{id:++uid,key:k,album:'VK Музыка',...o}:o.au?{id:++uid,key:k,album:'Audius',...o}:o.ym?{id:++uid,key:k,album:'Яндекс Музыка',...o}:{id:++uid,key:k,yt:o.yt,title:o.title,artist:o.artist,album:'YouTube',dur:o.dur||0,prov:0};
+ if(!t){t=o.sc?{id:++uid,key:k,album:'SoundCloud',...o}:o.sp?{id:++uid,key:k,album:'Spotify',...o}:o.vk?{id:++uid,key:k,album:'VK Музыка',...o}:o.au?{id:++uid,key:k,album:'Audius',...o}:o.ym?{id:++uid,key:k,album:'Яндекс Музыка',...o}:{id:++uid,key:k,yt:o.yt,title:o.title,artist:o.artist,album:'YouTube',dur:o.dur||0,prov:0};
   delete t.pri;delete t.fv;X.push(t);
   if(X.length>400){const keep=new Set([...Q,...rcL.map(x=>x.id),...(artS?artS.tr.map(x=>x.id):[])]);X=X.filter((x,i)=>keep.has(x.id)||i>X.length-200)}}
  return t}
@@ -859,7 +861,7 @@ function rs(){const q=$('#q').value.trim().toLowerCase();
 function play(id,ids,rec){mixOn=0;waveOn=0;recQ=rec?1:0;Q=ids&&ids.length?ids:T.map(t=>t.id);cur=Q.indexOf(id);load()}
 function load(){const t=curT();if(!t)return;yDone=0;a.pause();if(hls){hls.destroy();hls=null}Y&&Y.pauseVideo&&Y.pauseVideo();E=t.yt?yA:a;$('#ytbox').hidden=!t.yt;
  if(t.yt)ytLoad(()=>{if(curT()===t)Y.loadVideoById(t.yt)});
- else{const go=u=>{if(curT()===t){a.src=u;a.play().catch(()=>{})}};t.vk?vkUrl(t).then(u=>vkAttach(t,u,go)).catch(()=>{toast('VK Музыка не отвечает. Проверьте токен и шлюз в настройках');setTimeout(()=>step(1,true),900)}):t.au?auUrl(t.au).then(go):t.ym?ymPlayUrl(t).then(go).catch(()=>{toast('Яндекс Музыка не отвечает. Проверьте подключение в настройках');setTimeout(()=>step(1,true),900)}):go(t.url)}
+ else{const go=u=>{if(curT()===t){a.src=u;a.play().catch(()=>{})}};t.sc||t.sp?scPlay(t,go):t.vk?vkUrl(t).then(u=>vkAttach(t,u,go)).catch(()=>{toast('VK Музыка не отвечает. Проверьте токен и шлюз в настройках');setTimeout(()=>step(1,true),900)}):t.au?auUrl(t.au).then(go):t.ym?ymPlayUrl(t).then(go).catch(()=>{toast('Яндекс Музыка не отвечает. Проверьте подключение в настройках');setTimeout(()=>step(1,true),900)}):go(t.url)}
  played=[t.id,...played.filter(x=>x!==t.id)].slice(0,12);taste(t,1);ui();if(mixOn&&Q.length-cur<4)mixFill();if(recQ&&Q.length-cur<4)recMore();if(waveOn&&Q.length-cur<4)waveMore();
  if('mediaSession'in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:t.title,artist:t.artist,album:t.album,artwork:t.yt||t.cover?[{src:t.cover||'https://i.ytimg.com/vi/'+t.yt+'/hqdefault.jpg',sizes:'480x360'}]:[]})}}
 function step(d,auto){if(!Q.length)return;let n=cur+d;
@@ -1024,7 +1026,7 @@ function addDl(t,blob,name,mime){const f=new File([blob],name,{type:blob.type||m
  if(n.cover)fetch(n.cover).then(r=>r.ok?r.blob():null).then(cb=>{if(cb){n.cover=URL.createObjectURL(cb);idb('readwrite',s=>s.put({f,album:'Загрузки',m,cb},key));render()}}).catch(()=>{});
  render()}
 async function dl(t){if(!t||dlS.has(t.key))return;if(isDl(t)){toast('Уже в медиатеке, раздел «Загрузки»');return}
- const local=!t.au&&!t.yt&&!t.ym&&!t.vk;dlS.set(t.key,0);paintDl();hap(10);let lp=-1,pv=0;
+ const local=!t.au&&!t.yt&&!t.ym&&!t.vk&&!t.sc&&!t.sp;dlS.set(t.key,0);paintDl();hap(10);let lp=-1,pv=0;
  const tick=p=>{if(p==null)return;const n=Math.floor(p*10)*10;if(n!==lp){lp=n;toast('Скачиваю: '+n+'%')}};
  try{let blob,mime='';
   if(local)blob=await(await fetch(t.url)).blob();
@@ -1085,7 +1087,7 @@ function renderSettings(){const b=$('#sbody');if(!b)return;b.dataset.ok=1;
   card('Объём',`<h4 class="sec">Треков одного исполнителя</h4>`+segB('rcap',[[1,'1'],[2,'2'],[3,'3'],[5,'5']])+`<h4 class="sec">Размер ленты</h4>`+segB('rn',[[10,'10'],[20,'20'],[30,'30']]))+
   card('Поведение ленты',tglB('rtaste','Учитывать прослушивания','Если избранного мало')+tglB('rflow','Играть дальше по ленте','После трека включается следующий из ленты')+tglB('rauto','Листать ленту самой','Каждые несколько секунд')+
    `<div class="seg two" style="margin-top:10px"><button data-act="rfresh">Обновить ленту</button><button data-act="rtaste0">Сбросить мой вкус</button></div>`);
- else h=ymCard()+vkCard()+
+ else h=ymCard()+vkCard()+scCard()+spCard()+
   card('Скачивание',segB('dlTo',[['both','Везде'],['lib','В медиатеку'],['file','Файлом']])+`<p class="hint">В медиатеке трек играет без интернета и лежит в разделе «Загрузки». Файл сохраняется в загрузки телефона. Audius качается напрямую. Для YouTube приложение пробует Cobalt, Piped, затем ищет этот же трек на Audius и в Яндекс Музыке.</p>`)+
   card('Cobalt для YouTube (необязательно)',`<div class="seg two"><button data-act="cobalt">${cfg.cobalt?'Адрес: '+esc(cfg.cobalt.replace(/^https?:\/\//,'').slice(0,18)):'Указать адрес'}</button><button data-act="cobaltk">${cfg.cobaltk?'Ключ задан':'Ключ API'}</button></div>`)+
   card('Поиск по YouTube',`<div class="seg two"><button data-act="sx">Свой воркер</button><button data-act="pipe">Сервер Piped</button></div><button class="btn alt full" data-act="ykey">Ключ YouTube API</button>`);
@@ -1305,6 +1307,36 @@ function vkCard(){const gw=vkBase();let b;
   `<div class="srow2" style="margin-top:8px">${sbtn('vkgw','Изменить адрес шлюза')}${sbtn('vkua','Вход как: '+(cfg.vkUa==='official'?'официальный VK':'Kate Mobile'))}</div>`;
   if(cfg.vkTok&&!vkInfo&&!vkChk){vkChk=1;vkCheck().then(()=>{vkChk=0;if(stab==='svc')renderSettings()})}}
  return card('VK Музыка',b,'Поиск, ваша музыка и рекомендации, как в VK X. Вход по логину и паролю, в том числе с двухфакторной аутентификацией. Неофициальный способ, VK может его ограничить.')}
+/* ================= SoundCloud (через шлюз) и Spotify (PKCE) ================= */
+const scOn=()=>!!(cfg.sc&&vkBase());
+async function scJ(p){const r=await fetch(vkBase()+p),j=await r.json().catch(()=>null);if(!r.ok||!j||j.error)throw new Error((j&&j.error)||('SoundCloud '+r.status));return j}
+const scSearch=async q=>(await scJ('/sc/search?q='+encodeURIComponent(q))).map(x=>({sc:String(x.id),title:x.title,artist:x.artist,dur:x.dur,cover:x.cover}));
+async function scResolve(t){const l=await scSearch(t.artist+' '+t.title);if(!l.length)throw new Error('нет на SoundCloud');const b=l.find(x=>!t.dur||Math.abs(x.dur-t.dur)<=10)||l[0];return t.scm=b.sc}
+async function scPlay(t,go){try{const j=await scJ('/sc/url?id='+(t.sc||t.scm||await scResolve(t)));if(curT()!==t)return;
+ if(j.hls){await hlsLoad();if(curT()!==t)return;if(window.Hls&&Hls.isSupported()){hls=new Hls();hls.loadSource(j.url);hls.attachMedia(a);hls.on(Hls.Events.MANIFEST_PARSED,()=>a.play().catch(()=>{}));return}}
+ go(j.url)}catch(e){toast(t.sp?'Не нашёл этот трек Spotify на SoundCloud. Пропускаю':'SoundCloud не отвечает. Проверьте шлюз');setTimeout(()=>step(1,true),900)}}
+const SPR=()=>location.origin+location.pathname,spOn=()=>!!(cfg.spId&&cfg.spTok&&cfg.spTok.r);
+async function spLogin(){const v=[...crypto.getRandomValues(new Uint8Array(64))].map(b=>'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[b%62]).join('');
+ const c=btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v))))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+ ls.set('spv',v);location.href='https://accounts.spotify.com/authorize?'+new URLSearchParams({response_type:'code',client_id:cfg.spId,scope:'user-library-read playlist-read-private',redirect_uri:SPR(),code_challenge_method:'S256',code_challenge:c})}
+async function spToken(body){const r=await fetch('https://accounts.spotify.com/api/token',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_id:cfg.spId,...body})}),j=await r.json().catch(()=>({}));
+ if(!j.access_token)throw new Error(j.error_description||j.error||'нет ответа');cfg.spTok={a:j.access_token,r:j.refresh_token||(cfg.spTok&&cfg.spTok.r)||'',e:Date.now()+(j.expires_in-60)*1000};saveCfg();return j.access_token}
+async function spApi(p){const t=cfg.spTok;if(!t)throw new Error('не подключён');const a=Date.now()>t.e?await spToken({grant_type:'refresh_token',refresh_token:t.r}):t.a;
+ const r=await fetch('https://api.spotify.com/v1'+p,{headers:{Authorization:'Bearer '+a}});if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error((j.error&&j.error.message)||('ошибка '+r.status))}return r.json()}
+const spMap=x=>x&&x.id?{sp:x.id,title:x.name,artist:(x.artists||[]).map(a=>a.name).join(', '),dur:Math.round((x.duration_ms||0)/1000),cover:(x.album&&x.album.images&&(x.album.images[1]||x.album.images[0])||{}).url||''}:null;
+const spSearch=async q=>(await spApi('/search?type=track&limit=10&q='+encodeURIComponent(q))).tracks.items.map(spMap).filter(Boolean);
+(async()=>{const c=new URLSearchParams(location.search).get('code'),v=ls.get('spv','');if(!c||!v||!cfg.spId)return;ls.set('spv','');
+ try{await spToken({grant_type:'authorization_code',code:c,redirect_uri:SPR(),code_verifier:v});toast('Spotify подключён')}catch(e){toast('Spotify: '+e.message)}
+ try{history.replaceState(null,'',SPR())}catch{}})();
+function scCard(){const gw=vkBase();return card('SoundCloud',gw?`<div class="srow2">${sbtn('scgl',cfg.sc?'Отключить':'Включить','pri')}</div>`:`<div class="srow2">${sbtn('vkgw','Указать адрес шлюза','pri')}</div>`,'Бесплатный каталог без аккаунта. Работает через тот же шлюз (vk-worker.js), что и VK: обновите воркер.')}
+function spCard(){const b=!cfg.spId?`<div class="srow2">${sbtn('spid','Указать Client ID','pri')}</div>`:
+  (cfg.spTok?`<p class="hint">Подключено.${scOn()?'':' Включите SoundCloud выше: через него играют треки.'}</p><div class="srow2">${sbtn('spmy','Мои треки','pri')}${sbtn('spout','Выйти')}</div>`:`<div class="srow2">${sbtn('splogin','Войти в Spotify','pri')}</div>`)+`<div class="srow2" style="margin-top:8px">${sbtn('spid','Изменить Client ID')}</div>`;
+ return card('Spotify',b,'Поиск и ваши треки. Spotify сам в браузере не играет, поэтому трек ищется на SoundCloud и играет оттуда, версия может отличаться. Нужен свой Client ID с developer.spotify.com/dashboard, Redirect URI в нём: <b>'+esc(SPR())+'</b>')}
+Object.assign(A,{
+ scgl:()=>{cfg.sc=cfg.sc?0:1;saveCfg();renderSettings()},
+ spid:()=>{const v=prompt('Spotify Client ID. Redirect URI в приложении Spotify должен быть:\n'+SPR(),cfg.spId||'');if(v===null)return;cfg.spId=v.trim();saveCfg();renderSettings()},
+ splogin:()=>spLogin(),spout:()=>{cfg.spTok=null;saveCfg();renderSettings()},
+ spmy:async()=>{toast('Загружаю ваши треки Spotify…');try{const l=(await spApi('/me/tracks?limit=50')).items.map(i=>spMap(i.track)).filter(Boolean).map(ensure);if(!l.length)throw new Error('список пуст');play(l[0].id,l.map(t=>t.id))}catch(e){toast('Spotify: '+(e.message||'ошибка'))}}});
 /* вход в VK по логину и паролю через шлюз: SMS или приложение для 2FA, капча */
 function vkLogin(){
  if(!vkBase()){A.vkgw();if(!vkBase())return}
@@ -1320,7 +1352,7 @@ function vkLogin(){
   m.innerHTML=`<div class="vkb"><h3>${T[0]}</h3><p class="hint">${T[1]}</p>${T[2]}${S.err?`<p class="vke">${esc(S.err)}</p>`:''}<div class="vkr"><button type="button" class="btn alt" data-vkx>Отмена</button><button class="btn pri"${S.busy?' disabled':''}>${S.busy?'Подождите…':s==='login'?'Войти':'Продолжить'}</button></div>${s==='code'&&S.type==='app'?'<button type="button" class="chip" data-vksms style="margin-top:10px;width:100%">Прислать код по SMS</button>':''}${s==='login'?'<button type="button" class="chip" data-vkpg style="margin-top:10px;width:100%">Войти через страницу VK, как в Kate</button>':''}</div>`;
   m.querySelector('[data-vkx]').onclick=()=>{S.pw='';m.remove()};
   const b=m.querySelector('[data-vksms]');if(b)b.onclick=()=>{S.sms=1;go()};
-  const pg=m.querySelector('[data-vkpg]');if(pg)pg.onclick=()=>{S.login=m.elements.l.value.trim();S.pw=m.elements.p.value;Object.assign(S,{step:'web',page:1,err:'',url:'https://oauth.vk.com/authorize?client_id='+(cfg.vkUa==='official'?'2274003':'2685278')+'&display=mobile&redirect_uri=https://oauth.vk.com/blank.html&scope=audio,offline&response_type=token&v=5.131&revoke=1'});draw()};
+  const pg=m.querySelector('[data-vkpg]');if(pg)pg.onclick=()=>{S.login=m.elements.l.value.trim();S.pw=m.elements.p.value;cfg.vkUa='kate';saveCfg();Object.assign(S,{step:'web',page:1,err:'',url:'https://oauth.vk.com/authorize?client_id=2685278&display=mobile&redirect_uri=https://oauth.vk.com/blank.html&scope=audio,offline&response_type=token&v=5.131&revoke=1'});draw()};
   const f=m.querySelector('input');if(f&&!S.busy)f.focus()};
  const fin=t=>{cfg.vkTok=t;saveCfg();vkInfo=null;rcStale=1;S.pw='';m.remove();renderSettings();toast('VK подключён')};
  async function go(){S.busy=1;S.err='';draw();
