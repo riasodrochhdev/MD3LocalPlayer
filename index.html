@@ -580,7 +580,7 @@ let T=[],X=[],mixOn=0,mixBusy=0,uid=0,favs=new Set(ls.get('fav',[])),recent=ls.g
 const a=new Audio(),mq=matchMedia('(max-width:899px)'),byId=i=>T.find(t=>t.id===i)||X.find(t=>t.id===i),curT=()=>byId(Q[cur]);
 let Y,yb=0,yp,E=a,cdir=0,cdx=0;
 /* ---- v6: настройки, общие помощники ---- */
-const CFG0={fav:'plus',snow:0,snowN:2,refr:1,rlang:'fav',bg:'fluid',bgCov:1,bgSpd:2,bgInt:2,bgPlay:0,hap:1,ymgw:'',ymTok:'',ymdev:'',v:0,rart:[],rgen:[],rban:[],rcap:1,rn:20,rau:1,ryt:1,rtaste:1,rflow:1,rauto:0,dlTo:'both',cobalt:'',cobaltk:'',rym:1,rvk:1,vkgw:'',vkTok:'',vkUa:'kate',wp:0,wpDim:35,wpBlur:0};
+const CFG0={fav:'plus',snow:0,snowN:2,refr:1,rlang:'fav',bg:'fluid',bgCov:1,bgSpd:2,bgInt:2,bgPlay:0,hap:1,ymgw:'',ymTok:'',ymdev:'',v:0,rart:[],rgen:[],rban:[],rcap:1,rn:20,rau:1,ryt:1,rtaste:1,rflow:1,rauto:0,dlTo:'both',cobalt:'',cobaltk:'',rym:1,rvk:1,rsc:1,vkgw:'',vkTok:'',vkUa:'kate',wp:0,wpDim:35,wpBlur:0};
 const cfg={...CFG0,...ls.get('cfg',{})};
 ['rart','rgen','rban'].forEach(k=>{if(!Array.isArray(cfg[k]))cfg[k]=[]});
 const saveCfg=()=>ls.set('cfg',cfg);
@@ -705,10 +705,11 @@ async function recGather(n,excl){
   if(ru==='any'&&C.rau)topK(tst.g,2).forEach(g=>jobs.push(auTrend(g)))}
  const dflt=()=>{const j=[],q=shfl(RUQ).slice(0,4);if(C.rau){q.forEach(x=>j.push(auSearch(x,15)));if(ru==='any')j.push(auTrend())}if((ymOn()&&C.rym))j.push(ymSearch(q[0]).catch(()=>[]));return j};
  if(!jobs.length)dflt().forEach(j=>jobs.push(j));
+ if(scR()){const sf=fvT.filter(t=>t.sc||t.scm);shfl(sf).slice(0,2).forEach(t=>jobs.push(scReco(t.sc||t.scm).catch(()=>[])));if(!sf.length)jobs.push(scReco().catch(()=>[]))}
  if(vkR()){const vf=fvT.find(t=>t.vk);jobs.push(vkReco(vf&&vf.vk).catch(()=>[]))}
  if(C.ryt)(yq.length?yq:[[shfl(RUQ)[0]]]).slice(0,2).forEach(([q,a])=>jobs.push(yt(q,a)));
  const pool=await run(jobs);
- const flt=l=>{const m=new Map();l.forEach(o=>{if(!o||(!o.au&&!o.yt&&!o.ym&&!o.vk))return;const k=rk(o);if(have.has(k)||ban.has(norm(o.artist)))return;if(ru==='ru'&&!o.pri&&!RU.test(o.title+' '+o.artist))return;if(!m.has(k)||o.pri||o.fv)m.set(k,o)});return[...m.values()]};
+ const flt=l=>{const m=new Map();l.forEach(o=>{if(!o||(!o.au&&!o.yt&&!o.ym&&!o.vk&&!o.sc&&!o.sp))return;const k=rk(o);if(have.has(k)||ban.has(norm(o.artist)))return;if(ru==='ru'&&!o.pri&&!RU.test(o.title+' '+o.artist))return;if(!m.has(k)||o.pri||o.fv)m.set(k,o)});return[...m.values()]};
  let L=flt(pool);
  if(L.length<n*.5)L=flt([...pool,...await run(dflt())]);
  const fr=L.filter(o=>!rseen.has(rk(o)));if(fr.length>=Math.min(n,8))L=fr;
@@ -876,7 +877,7 @@ function ui(){const t=curT(),pa=!E.paused&&!!t;if(t!==ui.l){ui.l=t;drawCar(cdir)
  $$('[data-act=fav]').forEach(b=>b.classList.toggle('on',!!t&&favs.has(t.key)));
  $$('[data-act=shuf]').forEach(b=>b.classList.toggle('on',shuf));
  $$('[data-act=rep]').forEach(b=>{b.classList.toggle('on',rep>0);b.dataset.s=rep});paintDl()}
-let yDone=0;const ended=()=>{if(E===yA){if(yDone)return;yDone=1}rep===2?(E.currentTime=0,E.play(),yDone=0):step(1,true)};a.onplay=a.onpause=ui;a.onended=ended;a.onerror=()=>{const t=curT();if(t&&t.ym&&!t.px){t.px=1;a.src=ymStream(t.ym);a.play().catch(()=>{});return}if(t&&(t.au||t.ym)){toast((t.ym?'Трек Яндекса':'Трек Audius')+' не загрузился. Пропускаю');setTimeout(()=>step(1,true),800)}};
+let yDone=0;const ended=()=>{if(E===yA){if(yDone)return;yDone=1}rep===2?(E.currentTime=0,E.play(),yDone=0):step(1,true)};a.onplay=a.onpause=ui;a.onended=ended;a.onerror=()=>{const t=curT();if(t&&t.ym&&!t.px){t.px=1;a.src=ymStream(t.ym);a.play().catch(()=>{});return}if(t&&(t.au||t.ym||t.sc||t.sp)){toast((t.ym?'Трек Яндекса':t.sc||t.sp?'Трек SoundCloud':'Трек Audius')+' не загрузился. Пропускаю');setTimeout(()=>step(1,true),800)}};
 const SK=$$('.seek'),CU=$$('.cur'),TO=$$('.tot'),FL=$('#mini>.fill');let sk=0,lt='';
 SK.forEach(r=>{r.addEventListener('pointerdown',()=>sk=1);r.addEventListener('change',()=>sk=0)});addEventListener('pointerup',()=>sk=0);
 const tick=()=>{const d=E.duration,c=E.currentTime,p=d?c/d:0;FL.style.transform='scaleX('+p+')';
@@ -1079,7 +1080,7 @@ function renderSettings(){const b=$('#sbody');if(!b)return;b.dataset.ok=1;
    (cfg.bg!=='off'?tglB('bgCov','Цвета по обложке','Фон подстраивается под играющий трек')+tglB('bgPlay','Двигать только во время музыки','На паузе фон замирает почти полностью')+
    sec('Скорость')+segB('bgSpd',[[1,'Медленно'],[2,'Средне'],[3,'Быстро']])+sec('Насыщенность')+segB('bgInt',[[1,'Мягко'],[2,'Средне'],[3,'Ярко']]):''));
  else if(stab==='feed')h=card('Как строится лента',`<p class="hint" style="margin-top:0">Главный источник — ваше избранное: берутся похожие на него треки и связанные исполнители (с Яндексом это «похожие треки», без него — Audius). Ниже можно добавить свои исполнители и жанры.</p>`)+
-  card('Источники рекомендаций',tglB('ryt','YouTube','Нужен рабочий Piped или свой воркер')+tglB('rym','Яндекс Музыка','Нужно подключение в «Сервисах»')+tglB('rvk','VK Музыка','Нужно подключение в «Сервисах»')+tglB('rau','Audius'))+
+  card('Источники рекомендаций',tglB('ryt','YouTube','Нужен рабочий Piped или свой воркер')+tglB('rym','Яндекс Музыка','Нужно подключение в «Сервисах»')+tglB('rvk','VK Музыка','Нужно подключение в «Сервисах»')+tglB('rsc','SoundCloud','Включите SoundCloud в «Сервисах»')+tglB('rau','Audius'))+
   card('Язык треков',segB('rlang',[['fav','По вкусу'],['any','Любой'],['pref','Больше русских'],['ru','Только русские']])+`<p class="hint">«По вкусу» сам выбирает язык по вашему избранному. Исполнители из вашего списка показываются всегда.</p>`)+
   card('Мои исполнители',chipB('rart','Например: Кино'))+
   card('Жанры',`<div class="chb">${GEN.map(g=>`<button class="chip${cfg.rgen.includes(g[0])?' on':''}" data-gn="${g[0]}">${g[1]}</button>`).join('')}</div>`)+
@@ -1094,7 +1095,7 @@ function renderSettings(){const b=$('#sbody');if(!b)return;b.dataset.ok=1;
  b.innerHTML=h}
 const sec=t=>`<h4 class="sec">${t}</h4>`;
 function cfgChanged(k){saveCfg();
- if(['rlang','rart','rgen','rban','rcap','rn','rau','ryt','rym','rvk','rtaste'].includes(k))rcStale=1;
+ if(['rlang','rart','rgen','rban','rcap','rn','rau','ryt','rym','rvk','rsc','rtaste'].includes(k))rcStale=1;
  if(k==='fav')document.documentElement.dataset.fav=cfg.fav;
  if(k==='snow'||k==='snowN')snow.set();
  if(k==='refr')lgAll();
@@ -1308,12 +1309,14 @@ function vkCard(){const gw=vkBase();let b;
   if(cfg.vkTok&&!vkInfo&&!vkChk){vkChk=1;vkCheck().then(()=>{vkChk=0;if(stab==='svc')renderSettings()})}}
  return card('VK Музыка',b,'Поиск, ваша музыка и рекомендации, как в VK X. Вход по логину и паролю, в том числе с двухфакторной аутентификацией. Неофициальный способ, VK может его ограничить.')}
 /* ================= SoundCloud (через шлюз) и Spotify (PKCE) ================= */
-const scOn=()=>!!(cfg.sc&&vkBase());
-async function scJ(p){const r=await fetch(vkBase()+p),j=await r.json().catch(()=>null);if(!r.ok||!j||j.error)throw new Error((j&&j.error)||('SoundCloud '+r.status));return j}
-const scSearch=async q=>(await scJ('/sc/search?q='+encodeURIComponent(q))).map(x=>({sc:String(x.id),title:x.title,artist:x.artist,dur:x.dur,cover:x.cover}));
+const scBase=()=>String(cfg.scgw||cfg.vkgw||'').trim().replace(/\/+$/,''),scOn=()=>!!(cfg.sc&&scBase());
+async function scJ(p){const r=await fetch(scBase()+p),j=await r.json().catch(()=>null);if(!r.ok||!j||j.error)throw new Error((j&&j.error)||('SoundCloud '+r.status));return j}
+const scMapT=x=>({sc:String(x.id),title:x.title,artist:x.artist,dur:x.dur,cover:x.cover}),scR=()=>scOn()&&cfg.rsc;
+const scSearch=async q=>(await scJ('/sc/search?q='+encodeURIComponent(q))).map(scMapT),scReco=async id=>(await scJ('/sc/reco?id='+encodeURIComponent(id||''))).map(scMapT);
 async function scResolve(t){const l=await scSearch(t.artist+' '+t.title);if(!l.length)throw new Error('нет на SoundCloud');const b=l.find(x=>!t.dur||Math.abs(x.dur-t.dur)<=10)||l[0];return t.scm=b.sc}
 async function scPlay(t,go){try{const j=await scJ('/sc/url?id='+(t.sc||t.scm||await scResolve(t)));if(curT()!==t)return;
- if(j.hls){await hlsLoad();if(curT()!==t)return;if(window.Hls&&Hls.isSupported()){hls=new Hls();hls.loadSource(j.url);hls.attachMedia(a);hls.on(Hls.Events.MANIFEST_PARSED,()=>a.play().catch(()=>{}));return}}
+ if(hls){try{hls.destroy()}catch{}hls=null}
+ if(j.hls){await hlsLoad();if(curT()!==t)return;if(window.Hls&&Hls.isSupported()){hls=new Hls();hls.loadSource(j.url);hls.attachMedia(a);hls.on(Hls.Events.MANIFEST_PARSED,()=>a.play().catch(()=>{}));hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal&&curT()===t){toast('Трек SoundCloud не загрузился. Пропускаю');setTimeout(()=>step(1,true),800)}});return}}
  go(j.url)}catch(e){toast(t.sp?'Не нашёл этот трек Spotify на SoundCloud. Пропускаю':'SoundCloud не отвечает. Проверьте шлюз');setTimeout(()=>step(1,true),900)}}
 const SPR=()=>location.origin+location.pathname,spOn=()=>!!(cfg.spId&&cfg.spTok&&cfg.spTok.r);
 async function spLogin(){const v=[...crypto.getRandomValues(new Uint8Array(64))].map(b=>'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[b%62]).join('');
@@ -1328,11 +1331,12 @@ const spSearch=async q=>(await spApi('/search?type=track&limit=10&q='+encodeURIC
 (async()=>{const c=new URLSearchParams(location.search).get('code'),v=ls.get('spv','');if(!c||!v||!cfg.spId)return;ls.set('spv','');
  try{await spToken({grant_type:'authorization_code',code:c,redirect_uri:SPR(),code_verifier:v});toast('Spotify подключён')}catch(e){toast('Spotify: '+e.message)}
  try{history.replaceState(null,'',SPR())}catch{}})();
-function scCard(){const gw=vkBase();return card('SoundCloud',gw?`<div class="srow2">${sbtn('scgl',cfg.sc?'Отключить':'Включить','pri')}</div>`:`<div class="srow2">${sbtn('vkgw','Указать адрес шлюза','pri')}</div>`,'Бесплатный каталог без аккаунта. Работает через тот же шлюз (vk-worker.js), что и VK: обновите воркер.')}
+function scCard(){const gw=scBase();return card('SoundCloud',`<p class="hint">Шлюз: <b>${gw?esc(gw.replace(/^https?:\/\//,'').slice(0,34)):'не указан'}</b></p><div class="srow2">${gw?sbtn('scgl',cfg.sc?'Отключить':'Включить','pri'):''}${sbtn('scgw',gw?'Изменить адрес шлюза':'Указать адрес шлюза',gw?'':'pri')}</div>`,'Бесплатный каталог без аккаунта. Нужен свой воркер на Cloudflare: файл sc-worker.js.')}
 function spCard(){const b=!cfg.spId?`<div class="srow2">${sbtn('spid','Указать Client ID','pri')}</div>`:
   (cfg.spTok?`<p class="hint">Подключено.${scOn()?'':' Включите SoundCloud выше: через него играют треки.'}</p><div class="srow2">${sbtn('spmy','Мои треки','pri')}${sbtn('spout','Выйти')}</div>`:`<div class="srow2">${sbtn('splogin','Войти в Spotify','pri')}</div>`)+`<div class="srow2" style="margin-top:8px">${sbtn('spid','Изменить Client ID')}</div>`;
  return card('Spotify',b,'Поиск и ваши треки. Spotify сам в браузере не играет, поэтому трек ищется на SoundCloud и играет оттуда, версия может отличаться. Нужен свой Client ID с developer.spotify.com/dashboard, Redirect URI в нём: <b>'+esc(SPR())+'</b>')}
 Object.assign(A,{
+ scgw:()=>{const v=prompt('Адрес шлюза SoundCloud (https://имя.аккаунт.workers.dev):',cfg.scgw||cfg.vkgw||'');if(v===null)return;let u=v.trim().replace(/\/+$/,'');if(u&&!/^https?:\/\//.test(u))u='https://'+u;cfg.scgw=u;saveCfg();renderSettings()},
  scgl:()=>{cfg.sc=cfg.sc?0:1;saveCfg();renderSettings()},
  spid:()=>{const v=prompt('Spotify Client ID. Redirect URI в приложении Spotify должен быть:\n'+SPR(),cfg.spId||'');if(v===null)return;cfg.spId=v.trim();saveCfg();renderSettings()},
  splogin:()=>spLogin(),spout:()=>{cfg.spTok=null;saveCfg();renderSettings()},
