@@ -1035,12 +1035,13 @@ async function dl(t){if(!t||dlS.has(t.key))return;if(isDl(t)){toast('Уже в �
   if(local)blob=await(await fetch(t.url)).blob();
   else{const tr=[];toast('Готовлю загрузку…');
    if(t.ym)tr.push(()=>ymSrc(t.ym));
+   if(t.sc||t.sp)tr.push(()=>scSrc(t));
    if(t.au){tr.push(async()=>({url:await auUrl(t.au),mime:'audio/mpeg'}));
     if(ymBase())tr.push(async()=>({url:ymBase()+'/au/stream?host='+encodeURIComponent(await H())+'&id='+encodeURIComponent(t.au),mime:'audio/mpeg'}))}
    if(t.yt){if(cfg.cobalt)tr.push(()=>cobalt(t.yt));tr.push(()=>pipeAudio(t.yt));tr.push(async()=>{const m=await auMatch(t);if(!m)throw 0;return{url:await auUrl(m.au),mime:'audio/mpeg'}})}
    /* запасной путь для любого трека: найти его в Яндекс Музыке */
    if(ymOn()&&!t.ym)tr.push(async()=>{const id=await ymFindId(t);if(!id)throw 0;return ymSrc(id)});
-   for(const f of tr){try{const s=await f(),b=await getBlob(s.url,tick);if(b.size<30000)throw 0;blob=b;mime=b.type||s.mime;break}catch(e){if(e&&e.pv)pv=1}}
+   for(const f of tr){try{const s=await f(),b=s.blobFn?await s.blobFn(tick):await getBlob(s.url,tick);if(b.size<30000)throw 0;blob=b;mime=b.type||s.mime;break}catch(e){if(e&&e.pv)pv=1}}
    if(!blob){if(t.au&&!pv){const u=await auUrl(t.au),a=document.createElement('a');a.href=u;a.target='_blank';a.rel='noopener';document.body.append(a);a.click();a.remove();toast('Прямая загрузка недоступна. Открыл аудио: сохраните его через меню браузера');return}throw Object.assign(new Error('fail'),{pv})}}
   const name=safe(t.artist)+' - '+safe(t.title)+'.'+extOf(mime||blob.type);
   if(local||cfg.dlTo!=='lib')saveFile(blob,name);
@@ -1322,6 +1323,16 @@ async function scPlay(t,go){try{const j=await scJ('/sc/url?id='+(t.sc||t.scm||aw
  if(hls){try{hls.destroy()}catch{}hls=null}
  if(j.hls){await hlsLoad();if(curT()!==t)return;if(window.Hls&&Hls.isSupported()){hls=new Hls();hls.loadSource(j.url);hls.attachMedia(a);hls.on(Hls.Events.MANIFEST_PARSED,()=>a.play().catch(()=>{}));hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal&&curT()===t)scBad('SoundCloud HLS: '+d.details+(d.response&&d.response.code?' '+d.response.code:''))});return}}
  t.scx=j.proxy||'';t.px=0;go(j.url)}catch(e){if(curT()===t)scBad(t.sp&&/нет на SoundCloud/.test(e.message)?'Не нашёл этот трек Spotify на SoundCloud':'SoundCloud: '+(e.message||'ошибка'))}}
+/* скачивание: mp3 одним запросом через шлюз, HLS собираем из сегментов */
+async function hlsBlob(u,prog,type){const pl=await(await fetch(u)).text();if(!/^#EXTM3U/.test(pl))throw new Error('плейлист');
+ const L=pl.split('\n').map(x=>x.trim()),mp=(L.find(x=>x.startsWith('#EXT-X-MAP'))||'').match(/URI="([^"]+)"/),segs=L.filter(x=>x&&x[0]!=='#');
+ if(!segs.length)throw new Error('нет сегментов');
+ const urls=[...(mp?[mp[1]]:[]),...segs],parts=new Array(urls.length);let n=0,i=0;
+ await Promise.all(Array.from({length:4},async()=>{for(;;){const k=i++;if(k>=urls.length)return;const r=await fetch(urls[k]);if(!r.ok)throw new Error('http '+r.status);parts[k]=await r.arrayBuffer();prog&&prog(++n/urls.length)}}));
+ return new Blob(parts,{type:mp?'audio/mp4':type})}
+async function scSrc(t){const j=await scJ('/sc/url?id='+(t.sc||t.scm||await scResolve(t)));
+ if(!j.hls)return{url:j.proxy,mime:'audio/mpeg'};
+ const ty=/mpeg/.test(j.mime||'')?'audio/mpeg':'audio/aac';return{mime:ty,blobFn:p=>hlsBlob(j.url,p,ty)}}
 const SPR=()=>location.origin+location.pathname,spOn=()=>!!(cfg.spId&&cfg.spTok&&cfg.spTok.r);
 async function spLogin(){const v=[...crypto.getRandomValues(new Uint8Array(64))].map(b=>'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[b%62]).join('');
  const c=btoa(String.fromCharCode(...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v))))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
