@@ -470,6 +470,14 @@ html[data-glass=liquid] #nav .on{background:none;box-shadow:none;color:var(--tx)
 .scard .tgl:first-child{padding-top:0}
 h4.sec{font-size:.84rem;font-weight:600;color:var(--mu);margin:14px 0 8px}
 .srow2{display:flex;gap:8px;flex-wrap:wrap}
+.vkm{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:20px;background:rgba(8,3,12,.62);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.vkb{width:min(100%,400px);border-radius:28px;padding:22px;background:var(--s1);border:1px solid var(--ln);box-shadow:0 24px 60px var(--sh);animation:vin .35s var(--ease)}
+.vkb h3{font:600 1.1rem/1.2 Unbounded,'Arial Black',sans-serif;margin-bottom:8px}
+.vkb .fi{display:block;width:100%;height:52px;margin-top:12px;padding:0 18px;border-radius:16px;background:var(--bg);border:1px solid var(--ln);color:var(--tx);font:inherit;font-size:1rem}
+.vkb .fi:focus{outline:2px solid var(--p);outline-offset:0}
+.vkb img{display:block;max-width:100%;margin-top:12px;border-radius:12px;background:#fff}
+.vke{color:var(--te);font-size:.88rem;margin-top:12px}
+.vkr{display:flex;gap:8px;margin-top:18px}.vkr .btn{flex:1;justify-content:center;padding:0 12px}.vkr .btn[disabled]{opacity:.6}
 .srow2 .btn{flex:1 1 auto;justify-content:center;text-decoration:none}
 .ymcode{padding:6px 0}
 .ymcode small{display:block;color:var(--mu);font-size:.82rem}
@@ -1293,11 +1301,41 @@ async function vkCheck(){try{const u=(await vkApi('users.get'))[0];await vkApi('
 function vkCard(){const gw=vkBase();let b;
  if(!gw)b=`<p class="hint">Как и Яндексу, VK нужен свой шлюз на Cloudflare Workers: файл <b>vk-worker.js</b>. Создайте Worker, вставьте код, нажмите Deploy и укажите адрес.</p><div class="srow2">${sbtn('vkgw','Указать адрес шлюза','pri')}</div>`;
  else{b=`<p class="hint">Шлюз: <b>${esc(gw.replace(/^https?:\/\//,'').slice(0,34))}</b></p>`+
-  (cfg.vkTok?`<p class="hint">${vkInfo?(vkInfo.err?esc(vkInfo.err):'Подключено: <b>'+esc(vkInfo.name)+'</b>'):'Проверяю…'}</p><div class="srow2">${sbtn('vkmy','Моя музыка','pri')}${sbtn('vkcheck','Проверить')}${sbtn('vkout','Выйти')}</div>`:`<div class="srow2">${sbtn('vktoken','Вставить токен','pri')}</div>`)+
-  `<div class="srow2" style="margin-top:8px">${sbtn('vkgw','Изменить адрес шлюза')}${sbtn('vkua','Токен: '+(cfg.vkUa==='official'?'официальный VK':'Kate Mobile'))}</div>`;
+  (cfg.vkTok?`<p class="hint">${vkInfo?(vkInfo.err?esc(vkInfo.err):'Подключено: <b>'+esc(vkInfo.name)+'</b>'):'Проверяю…'}</p><div class="srow2">${sbtn('vkmy','Моя музыка','pri')}${sbtn('vkcheck','Проверить')}${sbtn('vkout','Выйти')}</div>`:`<div class="srow2">${sbtn('vklogin','Войти через VK','pri')}${sbtn('vktoken','Вставить токен')}</div>`)+
+  `<div class="srow2" style="margin-top:8px">${sbtn('vkgw','Изменить адрес шлюза')}${sbtn('vkua','Вход как: '+(cfg.vkUa==='official'?'официальный VK':'Kate Mobile'))}</div>`;
   if(cfg.vkTok&&!vkInfo&&!vkChk){vkChk=1;vkCheck().then(()=>{vkChk=0;if(stab==='svc')renderSettings()})}}
- return card('VK Музыка',b,'Поиск, ваша музыка и рекомендации, как в VK X. Неофициальный способ: нужен токен аудио-API (Kate Mobile или официальный клиент), VK может его ограничить.')}
+ return card('VK Музыка',b,'Поиск, ваша музыка и рекомендации, как в VK X. Вход по логину и паролю, в том числе с двухфакторной аутентификацией. Неофициальный способ, VK может его ограничить.')}
+/* вход в VK по логину и паролю через шлюз: SMS или приложение для 2FA, капча */
+function vkLogin(){
+ if(!vkBase()){A.vkgw();if(!vkBase())return}
+ const S={step:'login',login:'',pw:'',code:'',type:'',mask:'',cap:'',capSid:'',capKey:'',sms:0,err:'',busy:0};
+ const m=document.createElement('form');m.className='vkm';document.body.append(m);
+ const fi=(n,t,ph,ac,v,x='')=>`<input class="fi" name="${n}" type="${t}" placeholder="${ph}" autocomplete="${ac}" value="${esc(v)}" ${x}>`;
+ const draw=()=>{const s=S.step;
+  const T={login:['Вход в VK','Логин и пароль идут через ваш шлюз прямо в VK и нигде не сохраняются. В плеере остаётся только токен.',fi('l','text','Телефон или почта','username',S.login,'autocapitalize="off"')+fi('p','password','Пароль','current-password',S.pw)],
+   code:['Код подтверждения',S.type==='app'?'Введите код из приложения для двухфакторной аутентификации.':'VK отправил SMS'+(S.mask?' на '+esc(S.mask):'')+'. Введите код из него.',fi('c','text','Код','one-time-code',S.code,'inputmode="numeric"')],
+   captcha:['Введите символы','VK просит подтвердить, что вы не робот.',`<img src="${esc(S.cap)}" alt="Капча">`+fi('k','text','Символы с картинки','off',S.capKey)]}[s];
+  m.innerHTML=`<div class="vkb"><h3>${T[0]}</h3><p class="hint">${T[1]}</p>${T[2]}${S.err?`<p class="vke">${esc(S.err)}</p>`:''}<div class="vkr"><button type="button" class="btn alt" data-vkx>Отмена</button><button class="btn pri"${S.busy?' disabled':''}>${S.busy?'Подождите…':s==='login'?'Войти':'Продолжить'}</button></div>${s==='code'&&S.type==='app'?'<button type="button" class="chip" data-vksms style="margin-top:10px;width:100%">Прислать код по SMS</button>':''}</div>`;
+  m.querySelector('[data-vkx]').onclick=()=>{S.pw='';m.remove()};
+  const b=m.querySelector('[data-vksms]');if(b)b.onclick=()=>{S.sms=1;go()};
+  const f=m.querySelector('input');if(f&&!S.busy)f.focus()};
+ async function go(){S.busy=1;S.err='';draw();
+  const body={login:S.login,password:S.pw,ua:cfg.vkUa||'kate',code:S.code,force_sms:S.sms,captcha_sid:S.capSid,captcha_key:S.capKey};S.sms=0;S.capSid=S.capKey='';
+  try{const j=await(await fetch(vkBase()+'/vk/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})).json();S.busy=0;
+   if(j.ok){cfg.vkTok=j.token;saveCfg();vkInfo=null;rcStale=1;S.pw='';m.remove();renderSettings();toast('VK подключён');return}
+   if(j.need==='code')Object.assign(S,{step:'code',type:j.type,mask:j.mask||'',code:''});
+   else if(j.need==='captcha')Object.assign(S,{step:'captcha',cap:j.img,capSid:j.sid});
+   else{S.err=j.error||'Не удалось войти';if(S.step==='captcha')S.step=S.code?'code':'login'}
+  }catch{S.busy=0;S.err='Шлюз не отвечает. Проверьте адрес и что воркер обновлён'}
+  draw()}
+ m.onsubmit=e=>{e.preventDefault();if(S.busy)return;const v=n=>m.elements[n]?m.elements[n].value.trim():'';
+  if(S.step==='login'){S.login=v('l');S.pw=m.elements.p.value;if(!S.login||!S.pw)return}
+  else if(S.step==='code'){S.code=v('c');if(!S.code)return}
+  else{S.capKey=v('k');if(!S.capKey)return}
+  go()};
+ draw()}
 Object.assign(A,{
+ vklogin:()=>vkLogin(),
  vkgw:()=>{const v=prompt('Адрес шлюза VK (https://имя.аккаунт.workers.dev). Пусто: отключить.',cfg.vkgw||'');if(v===null)return;let u=v.trim().replace(/\/+$/,'');if(u&&!/^https?:\/\//.test(u))u='https://'+u;cfg.vkgw=u;saveCfg();vkInfo=null;renderSettings()},
  vktoken:()=>{const v=prompt('Вставьте токен VK для аудио (Kate Mobile или официальный клиент):','');if(v&&v.trim()){cfg.vkTok=v.trim();saveCfg();vkInfo=null;renderSettings();rcStale=1}},
  vkcheck:()=>{vkInfo=null;renderSettings()},vkout:()=>{cfg.vkTok='';saveCfg();vkInfo=null;renderSettings();rcStale=1},
