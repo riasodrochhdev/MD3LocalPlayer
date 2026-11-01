@@ -1308,30 +1308,37 @@ function vkCard(){const gw=vkBase();let b;
 /* вход в VK по логину и паролю через шлюз: SMS или приложение для 2FA, капча */
 function vkLogin(){
  if(!vkBase()){A.vkgw();if(!vkBase())return}
- const S={step:'login',login:'',pw:'',code:'',type:'',mask:'',cap:'',capSid:'',capKey:'',sms:0,err:'',busy:0};
+ const S={step:'login',url:'',warn:'',page:0,login:'',pw:'',code:'',type:'',mask:'',cap:'',capSid:'',capKey:'',sms:0,err:'',busy:0};
  const m=document.createElement('form');m.className='vkm';document.body.append(m);
  const fi=(n,t,ph,ac,v,x='')=>`<input class="fi" name="${n}" type="${t}" placeholder="${ph}" autocomplete="${ac}" value="${esc(v)}" ${x}>`;
  const draw=()=>{const s=S.step;
+  const lk=l=>S.url?`<a class="btn alt" href="${esc(S.url)}" target="_blank" rel="noopener" style="width:100%;justify-content:center;margin-top:12px;text-decoration:none">${l}</a>`:'';
   const T={login:['Вход в VK','Логин и пароль идут через ваш шлюз прямо в VK и нигде не сохраняются. В плеере остаётся только токен.',fi('l','text','Телефон или почта','username',S.login,'autocapitalize="off"')+fi('p','password','Пароль','current-password',S.pw)],
-   code:['Код подтверждения',S.type==='app'?'Введите код из приложения для двухфакторной аутентификации.':'VK отправил SMS'+(S.mask?' на '+esc(S.mask):'')+'. Введите код из него.',fi('c','text','Код','one-time-code',S.code,'inputmode="numeric"')],
+   code:['Код подтверждения',S.type==='app'?'Введите код из приложения для двухфакторной аутентификации.':'VK отправил SMS'+(S.mask?' на '+esc(S.mask):'')+'. Введите код из него.',fi('c','text','Код','one-time-code',S.code,'inputmode="numeric"')+lk('Код не пришёл? Другой способ: MAX, SMS, VK ID')+(S.warn?`<p class="hint">VK ответил: ${esc(S.warn)}</p>`:'')],
+   web:S.page?['Вход через страницу VK','Войдите на странице VK, как в Kate Mobile: она сама спросит код 2FA и подтверждение. В конце откроется пустая страница. Скопируйте её адрес целиком и вставьте ниже. Если плеер потом пишет про другой IP, входите по логину и паролю.',lk('Открыть страницу VK')+fi('u','text','Адрес страницы после входа','off','')]:['Подтвердите вход','VK считает вход подозрительным. Откройте страницу VK и подтвердите вход: способ (приложение VK, MAX, SMS) выбирается там. Потом вернитесь сюда и нажмите «Продолжить».',lk('Открыть страницу VK')+fi('u','text','Адрес после подтверждения (если есть)','off','')],
    captcha:['Введите символы','VK просит подтвердить, что вы не робот.',`<img src="${esc(S.cap)}" alt="Капча">`+fi('k','text','Символы с картинки','off',S.capKey)]}[s];
-  m.innerHTML=`<div class="vkb"><h3>${T[0]}</h3><p class="hint">${T[1]}</p>${T[2]}${S.err?`<p class="vke">${esc(S.err)}</p>`:''}<div class="vkr"><button type="button" class="btn alt" data-vkx>Отмена</button><button class="btn pri"${S.busy?' disabled':''}>${S.busy?'Подождите…':s==='login'?'Войти':'Продолжить'}</button></div>${s==='code'&&S.type==='app'?'<button type="button" class="chip" data-vksms style="margin-top:10px;width:100%">Прислать код по SMS</button>':''}</div>`;
+  m.innerHTML=`<div class="vkb"><h3>${T[0]}</h3><p class="hint">${T[1]}</p>${T[2]}${S.err?`<p class="vke">${esc(S.err)}</p>`:''}<div class="vkr"><button type="button" class="btn alt" data-vkx>Отмена</button><button class="btn pri"${S.busy?' disabled':''}>${S.busy?'Подождите…':s==='login'?'Войти':'Продолжить'}</button></div>${s==='code'&&S.type==='app'?'<button type="button" class="chip" data-vksms style="margin-top:10px;width:100%">Прислать код по SMS</button>':''}${s==='login'?'<button type="button" class="chip" data-vkpg style="margin-top:10px;width:100%">Войти через страницу VK, как в Kate</button>':''}</div>`;
   m.querySelector('[data-vkx]').onclick=()=>{S.pw='';m.remove()};
   const b=m.querySelector('[data-vksms]');if(b)b.onclick=()=>{S.sms=1;go()};
+  const pg=m.querySelector('[data-vkpg]');if(pg)pg.onclick=()=>{S.login=m.elements.l.value.trim();S.pw=m.elements.p.value;Object.assign(S,{step:'web',page:1,err:'',url:'https://oauth.vk.com/authorize?client_id='+(cfg.vkUa==='official'?'2274003':'2685278')+'&display=mobile&redirect_uri=https://oauth.vk.com/blank.html&scope=audio,offline&response_type=token&v=5.131&revoke=1'});draw()};
   const f=m.querySelector('input');if(f&&!S.busy)f.focus()};
+ const fin=t=>{cfg.vkTok=t;saveCfg();vkInfo=null;rcStale=1;S.pw='';m.remove();renderSettings();toast('VK подключён')};
  async function go(){S.busy=1;S.err='';draw();
   const body={login:S.login,password:S.pw,ua:cfg.vkUa||'kate',code:S.code,force_sms:S.sms,captcha_sid:S.capSid,captcha_key:S.capKey};S.sms=0;S.capSid=S.capKey='';
   try{const j=await(await fetch(vkBase()+'/vk/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})).json();S.busy=0;
-   if(j.ok){cfg.vkTok=j.token;saveCfg();vkInfo=null;rcStale=1;S.pw='';m.remove();renderSettings();toast('VK подключён');return}
-   if(j.need==='code')Object.assign(S,{step:'code',type:j.type,mask:j.mask||'',code:''});
+   if(j.ok)return fin(j.token);
+   if(j.need==='code')Object.assign(S,{step:'code',type:j.type,mask:j.mask||'',code:'',url:j.url||'',warn:j.warn||''});
+   else if(j.need==='web'){const was=S.step==='web';Object.assign(S,{step:'web',url:j.url||S.url});if(was)S.err='VK пока не видит подтверждения. Подтвердите вход на странице VK и нажмите «Продолжить»'}
    else if(j.need==='captcha')Object.assign(S,{step:'captcha',cap:j.img,capSid:j.sid});
-   else{S.err=j.error||'Не удалось войти';if(S.step==='captcha')S.step=S.code?'code':'login'}
+   else{S.err=j.error||'Не удалось войти';if(S.step==='captcha')S.step=S.code?'code':'login';else if(S.step==='web')S.step='login'}
   }catch{S.busy=0;S.err='Шлюз не отвечает. Проверьте адрес и что воркер обновлён'}
   draw()}
  m.onsubmit=e=>{e.preventDefault();if(S.busy)return;const v=n=>m.elements[n]?m.elements[n].value.trim():'';
   if(S.step==='login'){S.login=v('l');S.pw=m.elements.p.value;if(!S.login||!S.pw)return}
-  else if(S.step==='code'){S.code=v('c');if(!S.code)return}
-  else{S.capKey=v('k');if(!S.capKey)return}
+  else if(S.step==='captcha'){S.capKey=v('k');if(!S.capKey)return}
+  else{const x=v(S.step==='code'?'c':'u'),t=(/access_token=([^&#\s]+)/.exec(x)||[])[1];if(t)return fin(t);
+   if(S.page){S.err='В адресе нет токена. Скопируйте адрес страницы целиком, вместе с #access_token=…';return draw()}
+   if(S.step==='code'){if(!x)return;S.code=/success=1/.test(x)?'':x}}
   go()};
  draw()}
 Object.assign(A,{
