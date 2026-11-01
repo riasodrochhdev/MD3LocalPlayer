@@ -1320,7 +1320,7 @@ let scFail=0;a.addEventListener('playing',()=>{scFail=0});
 function scBad(m){if(++scFail>2){scFail=0;a.pause();toast(m+'. Остановился после 3 ошибок подряд')}else{toast(m+'. Пропускаю');setTimeout(()=>step(1,true),900)}}
 async function scPlay(t,go){try{const j=await scJ('/sc/url?id='+(t.sc||t.scm||await scResolve(t)));if(curT()!==t)return;
  if(hls){try{hls.destroy()}catch{}hls=null}
- if(j.hls){await hlsLoad();if(curT()!==t)return;if(window.Hls&&Hls.isSupported()){hls=new Hls();hls.loadSource(j.url);hls.attachMedia(a);hls.on(Hls.Events.MANIFEST_PARSED,()=>a.play().catch(()=>{}));hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal&&curT()===t)scBad('SoundCloud HLS: '+d.details)});return}}
+ if(j.hls){await hlsLoad();if(curT()!==t)return;if(window.Hls&&Hls.isSupported()){hls=new Hls();hls.loadSource(j.url);hls.attachMedia(a);hls.on(Hls.Events.MANIFEST_PARSED,()=>a.play().catch(()=>{}));hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal&&curT()===t)scBad('SoundCloud HLS: '+d.details+(d.response&&d.response.code?' '+d.response.code:''))});return}}
  t.scx=j.proxy||'';t.px=0;go(j.url)}catch(e){if(curT()===t)scBad(t.sp&&/нет на SoundCloud/.test(e.message)?'Не нашёл этот трек Spotify на SoundCloud':'SoundCloud: '+(e.message||'ошибка'))}}
 const SPR=()=>location.origin+location.pathname,spOn=()=>!!(cfg.spId&&cfg.spTok&&cfg.spTok.r);
 async function spLogin(){const v=[...crypto.getRandomValues(new Uint8Array(64))].map(b=>'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'[b%62]).join('');
