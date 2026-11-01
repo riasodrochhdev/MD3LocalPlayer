@@ -475,6 +475,16 @@ h4.sec{font-size:.84rem;font-weight:600;color:var(--mu);margin:14px 0 8px}
 .ymcode small{display:block;color:var(--mu);font-size:.82rem}
 .ymcode b{display:block;font:700 2rem/1.2 Unbounded,'Arial Black',sans-serif;letter-spacing:.14em;text-align:center;padding:12px;margin:10px 0;border-radius:24px;background:var(--pc);color:var(--onpc)}
 @media(min-width:900px){#sbody{max-width:720px}}
+/* ===== v8 ===== */
+@media(min-width:900px){#v-settings .top h1{text-align:center}#v-settings .top,#stabs,#sbody{max-width:720px;margin-inline:auto}#stabs{justify-content:center}}
+#wp{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden}
+#wp>*{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.06);filter:blur(var(--wb,0px))}
+#wp::after{content:'';position:absolute;inset:0;background:color-mix(in srgb,var(--bg) var(--wd,35%),transparent)}
+html[data-wp] .amb,html[data-wp] #bg,html[data-wp] #bgn{display:none}
+.vrow{display:flex;align-items:center;gap:12px;color:var(--mu)}
+.vrow input{flex:1}
+input[type=range].vol{--v:100%}
+#sheet{--w:min(72vw,320px,34dvh)}
 </style>
 </head>
 <body>
@@ -540,11 +550,13 @@ h4.sec{font-size:.84rem;font-weight:600;color:var(--mu);margin:14px 0 8px}
  <div class="srow"><div class="mm"><h2 id="sT"></h2><small id="sA" style="color:var(--mu)"></small></div><div class="sbt"><button class="ib dlb" data-act="dl" aria-label="Скачать"><i data-i="dlb"></i></button><button class="ib fav" data-act="fav" aria-label="Добавить в избранное"><i data-i="fav"></i></button></div></div>
  <div><div class="wv"><div class="wtr"></div><div class="wact"><div class="wpat"></div></div><i class="wth"></i><input class="seek" type="range" min="0" max="1000" value="0" aria-label="Перемотка"></div><div class="srow"><time class="cur">0:00</time><time class="tot">0:00</time></div></div>
  <div class="ctl"><button class="ib" data-act="shuf" aria-label="Перемешать"><i data-i="shuffle"></i></button><button class="ib" data-act="prev" aria-label="Предыдущий"><i data-i="prev"></i></button><button class="pb hp" data-act="play" aria-label="Играть или пауза"></button><button class="ib" data-act="next" aria-label="Следующий"><i data-i="next"></i></button><button class="ib" data-act="rep" aria-label="Повтор"><i data-i="repeat"></i></button></div>
+ <div class="vrow"><i data-i="vol"></i><input class="vol" type="range" min="0" max="100" value="100" aria-label="Громкость"></div>
 </div>
 <div id="ytbox" class="glass" hidden><div id="ytp"></div><p id="yterr" hidden>Видео не открылось. Оно может быть недоступно для встраивания, а страница должна быть открыта по http(s), не из файла.</p></div>
 <div id="toast" role="status"></div>
 <input type="file" id="f" accept="audio/*,.mp3,.m4a,.flac,.wav,.ogg,.opus,.aac" multiple hidden>
 <input type="file" id="d" webkitdirectory multiple hidden>
+<input type="file" id="wpf" accept="image/*,video/*" hidden>
 
 <script>
 const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
@@ -560,7 +572,7 @@ let T=[],X=[],mixOn=0,mixBusy=0,uid=0,favs=new Set(ls.get('fav',[])),recent=ls.g
 const a=new Audio(),mq=matchMedia('(max-width:899px)'),byId=i=>T.find(t=>t.id===i)||X.find(t=>t.id===i),curT=()=>byId(Q[cur]);
 let Y,yb=0,yp,E=a,cdir=0,cdx=0;
 /* ---- v6: настройки, общие помощники ---- */
-const CFG0={fav:'plus',snow:0,snowN:2,refr:1,rlang:'fav',bg:'fluid',bgCov:1,bgSpd:2,bgInt:2,bgPlay:0,hap:1,ymgw:'',ymTok:'',ymdev:'',v:0,rart:[],rgen:[],rban:[],rcap:1,rn:20,rau:1,ryt:1,rtaste:1,rflow:1,rauto:0,dlTo:'both',cobalt:'',cobaltk:''};
+const CFG0={fav:'plus',snow:0,snowN:2,refr:1,rlang:'fav',bg:'fluid',bgCov:1,bgSpd:2,bgInt:2,bgPlay:0,hap:1,ymgw:'',ymTok:'',ymdev:'',v:0,rart:[],rgen:[],rban:[],rcap:1,rn:20,rau:1,ryt:1,rtaste:1,rflow:1,rauto:0,dlTo:'both',cobalt:'',cobaltk:'',rym:1,rvk:1,vkgw:'',vkTok:'',vkUa:'kate',wp:0,wpDim:35,wpBlur:0};
 const cfg={...CFG0,...ls.get('cfg',{})};
 ['rart','rgen','rban'].forEach(k=>{if(!Array.isArray(cfg[k]))cfg[k]=[]});
 const saveCfg=()=>ls.set('cfg',cfg);
@@ -610,7 +622,7 @@ async function ykeySearch(q){const k=ls.get('ykey',''),o=$('#ytres');if(!q){o.in
   o.innerHTML='<div class="sh"><h2>YouTube</h2></div><div class="list">'+(j.items.map(i=>`<div class="row" data-yt="${i.id.videoId}" data-t="${esc(i.snippet.title)}" data-c="${esc(i.snippet.channelTitle)}" tabindex="0" role="button"><img class="cv" src="${i.snippet.thumbnails.default.url}" alt="" style="object-fit:cover"><span class="mt"><b>${esc(i.snippet.title)}</b><small>${esc(i.snippet.channelTitle)}</small></span></div>`).join('')||'<p class="hsub">Ничего не найдено</p>')+'</div>'}
  catch{o.innerHTML='<p class="hsub">Поиск не удался: проверьте ключ и дневную квоту.</p>'}}
 /* ---- сохранение онлайн-треков (YouTube/Audius): без этого лайки на них терялись после перезахода ---- */
-const saveWeb=()=>ls.set('web',T.filter(t=>t.yt||t.au||t.ym).map(t=>({key:t.key,yt:t.yt,au:t.au,ym:t.ym,ya:t.ya,title:t.title,artist:t.artist,album:t.album,dur:t.dur,cover:t.cover,g:t.g,aa:t.aa,ah:t.ah})));
+const saveWeb=()=>ls.set('web',T.filter(t=>t.yt||t.au||t.ym||t.vk).map(t=>({key:t.key,yt:t.yt,au:t.au,ym:t.ym,vk:t.vk,ya:t.ya,title:t.title,artist:t.artist,album:t.album,dur:t.dur,cover:t.cover,g:t.g,aa:t.aa,ah:t.ah})));
 /* ---- Audius: бесплатный каталог, играет через обычный <audio>, без ключей и без видимого плеера ---- */
 let auH;const H=async()=>auH||(auH=await fetch('https://api.audius.co').then(r=>r.json()).then(j=>j.data[Math.random()*j.data.length|0]).catch(()=>'https://discoveryprovider.audius.co'));
 const auUrl=id=>H().then(h=>h+'/v1/tracks/'+id+'/stream?app_name=MD3Player');
@@ -619,9 +631,10 @@ const auGet=async p=>{try{const h=await H(),r=await fetch(h+'/v1/tracks/'+p+(p.i
 const auSearch=(q,n=12)=>auGet('search?limit='+n+'&query='+encodeURIComponent(q)),auTrend=g=>auGet('trending?time=week&limit=20'+(g?'&genre='+encodeURIComponent(g):''));
 function addAu(o,go){let t=T.find(x=>x.key==='au:'+o.au);if(!t){t=X.find(x=>x.key==='au:'+o.au);if(t)X=X.filter(x=>x!==t);else t={id:++uid,key:'au:'+o.au,album:'Audius',...o};T.push(t);saveWeb()}render();if(go)play(t.id)}
 async function asearch(q){const o=$('#aures');if(!q){o.innerHTML='';return}
- const [r,us,ym,ya]=await Promise.all([auSearch(q),auUsers(q),ymOn()?ymSearch(q).catch(()=>[]):[],ymOn()?ymSearchArtists(q).catch(()=>[]):[]]);if($('#q').value.trim()!==q)return;
+ const [r,us,ym,ya,vk]=await Promise.all([auSearch(q),auUsers(q),ymOn()?ymSearch(q).catch(()=>[]):[],ymOn()?ymSearchArtists(q).catch(()=>[]):[],vkOn()?vkSearch(q).catch(()=>[]):[]]);if($('#q').value.trim()!==q)return;
  const ua=[...ya.slice(0,6).map(a=>({yid:a.id,name:a.name,pic:a.pic})),...us.filter(u=>u.name).slice(0,6)];
  o.innerHTML=(ua.length?'<div class="sh"><h2>Исполнители</h2></div><div class="rail relr">'+ua.map(relB).join('')+'</div>':'')+
+  (vk.length?'<div class="sh"><h2>VK Музыка</h2></div><div class="list" data-ctx>'+vk.map(i=>row(ensure(i))).join('')+'</div>':'')+
   (ym.length?'<div class="sh"><h2>Яндекс Музыка</h2></div><div class="list" data-ctx>'+ym.map(i=>row(ensure(i))).join('')+'</div>':'')+
   (r.length?'<div class="sh"><h2>Audius</h2></div><div class="list">'+r.map(i=>`<div class="row" data-au="${esc(i.au)}" data-o="${esc(JSON.stringify(i))}" tabindex="0" role="button">${cv(i)}<span class="mt"><b>${esc(i.title)}</b><small>${al(i)}</small></span><time>${i.dur>0?fmt(i.dur):''}</time></div>`).join('')+'</div>':'')}
 /* ---- микс как во ВК: вкус = лайки (вес 3) + прослушивания по артистам и жанрам ---- */
@@ -631,7 +644,7 @@ async function mix(){toast('Собираю микс…');mixOn=1;recQ=0;waveOn=0
 /* ---- рекомендации v7: лента строится по избранному ---- */
 let rcL=[],rcBusy=0,rcTried=0,recQ=0,recBusy=0,rcd=0,rcStale=0,rTouch=0;
 const rseen=new Set(ls.get('rseen',[]));
-const rk=o=>o.au?'au:'+o.au:o.ym?'ym:'+o.ym:'yt:'+o.yt;
+const rk=o=>o.vk?'vk:'+o.vk:o.au?'au:'+o.au:o.ym?'ym:'+o.ym:'yt:'+o.yt;
 const pic=u=>u&&u.profile_picture&&(u.profile_picture['480x480']||u.profile_picture['150x150']||u.profile_picture['1000x1000'])||'';
 const auJ=async p=>{try{const h=await H(),r=await fetch(h+'/v1/'+p+(p.includes('?')?'&':'?')+'app_name=MD3Player');return(await r.json()).data}catch{return null}};
 const auUsers=q=>auJ('users/search?limit=8&query='+encodeURIComponent(q)).then(d=>Array.isArray(d)?d:[]);
@@ -646,7 +659,8 @@ async function auSeed(name,rel){const u=await auFind(name);if(!u)return{own:[],m
  return{own:tr,more}}
 /* трек из сети -> объект в памяти (в библиотеку попадает после «+» или скачивания) */
 function ensure(o){const k=rk(o);let t=T.find(x=>x.key===k)||X.find(x=>x.key===k);
- if(!t){t=o.au?{id:++uid,key:k,album:'Audius',...o}:o.ym?{id:++uid,key:k,album:'Яндекс Музыка',...o}:{id:++uid,key:k,yt:o.yt,title:o.title,artist:o.artist,album:'YouTube',dur:o.dur||0,prov:0};
+ if(t&&o.cover&&(o.ym||o.vk)&&t.cover!==o.cover)t.cover=o.cover;
+ if(!t){t=o.vk?{id:++uid,key:k,album:'VK Музыка',...o}:o.au?{id:++uid,key:k,album:'Audius',...o}:o.ym?{id:++uid,key:k,album:'Яндекс Музыка',...o}:{id:++uid,key:k,yt:o.yt,title:o.title,artist:o.artist,album:'YouTube',dur:o.dur||0,prov:0};
   delete t.pri;delete t.fv;X.push(t);
   if(X.length>400){const keep=new Set([...Q,...rcL.map(x=>x.id),...(artS?artS.tr.map(x=>x.id):[])]);X=X.filter((x,i)=>keep.has(x.id)||i>X.length-200)}}
  return t}
@@ -664,26 +678,27 @@ async function recGather(n,excl){
  const fa=[...new Map(fvT.slice().reverse().map(t=>[norm(t.artist),t])).values()].filter(t=>!noArt.test(t.artist)&&!ban.has(norm(t.artist)));
  shfl(fa.slice(0,12)).slice(0,3).forEach(t=>{
   if(C.rau)jobs.push(auSeed(t.artist,1).then(r=>[...r.own.slice(0,Math.max(1,C.rcap)).map(o=>({...o,pri:1,fv:1})),...r.more.map(o=>({...o,fv:1}))]));
-  if(ymOn())jobs.push(ymSimilar(t).then(l=>l.map(o=>({...o,fv:1}))));
+  if((ymOn()&&C.rym))jobs.push(ymSimilar(t).then(l=>l.map(o=>({...o,fv:1}))));
   if(C.ryt)yq.push([t.artist+' песни',t.artist])});
  /* 2) свои исполнители */
  shfl(C.rart).slice(0,3).forEach(a=>{
   if(C.rau)jobs.push(auSeed(a,1).then(r=>[...r.own.map(o=>({...o,pri:1})),...r.more]));
-  if(ymOn())jobs.push(ymSeedArtist(a,1).then(r=>[...r.own.map(o=>({...o,pri:1})),...r.more]));
+  if((ymOn()&&C.rym))jobs.push(ymSeedArtist(a,1).then(r=>[...r.own.map(o=>({...o,pri:1})),...r.more]));
   if(C.ryt)yq.push([a+' песни',a])});
  /* 3) жанры */
  shfl(C.rgen).slice(0,3).forEach(id=>{const g=GEN.find(x=>x[0]===id);if(!g)return;
   if(C.rau){jobs.push(auSearch(g[3],15));if(ru==='any'&&g[2])jobs.push(auTrend(g[2]))}
-  if(ymOn())jobs.push(ymSearch(g[3]).catch(()=>[]));
+  if((ymOn()&&C.rym))jobs.push(ymSearch(g[3]).catch(()=>[]));
   if(C.ryt)yq.push([g[3]])});
  /* 4) прослушивания: только если избранного мало */
  if(C.rtaste&&fa.length<3){shfl(topK(tst.a,8).filter(x=>!ban.has(norm(x)))).slice(0,2).forEach(a=>{if(C.rau)jobs.push(auSeed(a,1).then(r=>[...r.own.slice(0,Math.max(1,C.rcap)+1),...r.more]))});
   if(ru==='any'&&C.rau)topK(tst.g,2).forEach(g=>jobs.push(auTrend(g)))}
- const dflt=()=>{const j=[],q=shfl(RUQ).slice(0,4);if(C.rau){q.forEach(x=>j.push(auSearch(x,15)));if(ru==='any')j.push(auTrend())}if(ymOn())j.push(ymSearch(q[0]).catch(()=>[]));return j};
+ const dflt=()=>{const j=[],q=shfl(RUQ).slice(0,4);if(C.rau){q.forEach(x=>j.push(auSearch(x,15)));if(ru==='any')j.push(auTrend())}if((ymOn()&&C.rym))j.push(ymSearch(q[0]).catch(()=>[]));return j};
  if(!jobs.length)dflt().forEach(j=>jobs.push(j));
+ if(vkR()){const vf=fvT.find(t=>t.vk);jobs.push(vkReco(vf&&vf.vk).catch(()=>[]))}
  if(C.ryt)(yq.length?yq:[[shfl(RUQ)[0]]]).slice(0,2).forEach(([q,a])=>jobs.push(yt(q,a)));
  const pool=await run(jobs);
- const flt=l=>{const m=new Map();l.forEach(o=>{if(!o||(!o.au&&!o.yt&&!o.ym))return;const k=rk(o);if(have.has(k)||ban.has(norm(o.artist)))return;if(ru==='ru'&&!o.pri&&!RU.test(o.title+' '+o.artist))return;if(!m.has(k)||o.pri||o.fv)m.set(k,o)});return[...m.values()]};
+ const flt=l=>{const m=new Map();l.forEach(o=>{if(!o||(!o.au&&!o.yt&&!o.ym&&!o.vk))return;const k=rk(o);if(have.has(k)||ban.has(norm(o.artist)))return;if(ru==='ru'&&!o.pri&&!RU.test(o.title+' '+o.artist))return;if(!m.has(k)||o.pri||o.fv)m.set(k,o)});return[...m.values()]};
  let L=flt(pool);
  if(L.length<n*.5)L=flt([...pool,...await run(dflt())]);
  const fr=L.filter(o=>!rseen.has(rk(o)));if(fr.length>=Math.min(n,8))L=fr;
@@ -740,7 +755,7 @@ async function ymApi(path,body){
 const ymId=x=>String(x.id).split(':')[0];
 const ymCover=u=>u?'https://'+String(u).replace(/^https?:\/\//,'').replace('%%','400x400'):'';
 function ymMap(x){if(!x||!x.title||x.available===false)return null;const a=x.artists||[];
- return{ym:ymId(x),title:x.title+(x.version?' ('+x.version+')':''),artist:a.map(r=>r.name).filter(Boolean).join(', ')||'Яндекс Музыка',ya:a[0]&&a[0].id!=null?String(a[0].id):undefined,dur:x.durationMs?Math.round(x.durationMs/1000):0,cover:ymCover(x.coverUri||(x.albums&&x.albums[0]&&x.albums[0].coverUri))}}
+ return{ym:ymId(x),title:x.title+(x.version?' ('+x.version+')':''),artist:a.map(r=>r.name).filter(Boolean).join(', ')||'Яндекс Музыка',ya:a[0]&&a[0].id!=null?String(a[0].id):undefined,dur:x.durationMs?Math.round(x.durationMs/1000):0,cover:ymCover(x.coverUri||x.ogImage||(x.albums&&x.albums[0]&&(x.albums[0].coverUri||x.albums[0].ogImage)))}}
 const ymSearch=async q=>{const r=await ymApi('search?text='+encodeURIComponent(q)+'&nocorrect=false&type=track&page=0&playlist-in-best=true');return((r.tracks&&r.tracks.results)||[]).map(ymMap).filter(Boolean)};
 const ymSearchArtists=async q=>{const r=await ymApi('search?text='+encodeURIComponent(q)+'&nocorrect=false&type=artist&page=0');return((r.artists&&r.artists.results)||[]).filter(a=>a&&a.name).map(a=>({id:String(a.id),name:a.name,pic:ymCover(a.cover&&a.cover.uri)}))};
 const ymc=ls.get('ymc',{});
@@ -834,9 +849,9 @@ function rs(){const q=$('#q').value.trim().toLowerCase();
  $('#res').innerHTML=q?(r.length?r.map(row).join(''):empty('Ничего не найдено','Проверьте написание или поищите по исполнителю.')):''}
 
 function play(id,ids,rec){mixOn=0;waveOn=0;recQ=rec?1:0;Q=ids&&ids.length?ids:T.map(t=>t.id);cur=Q.indexOf(id);load()}
-function load(){const t=curT();if(!t)return;yDone=0;a.pause();Y&&Y.pauseVideo&&Y.pauseVideo();E=t.yt?yA:a;$('#ytbox').hidden=!t.yt;
+function load(){const t=curT();if(!t)return;yDone=0;a.pause();if(hls){hls.destroy();hls=null}Y&&Y.pauseVideo&&Y.pauseVideo();E=t.yt?yA:a;$('#ytbox').hidden=!t.yt;
  if(t.yt)ytLoad(()=>{if(curT()===t)Y.loadVideoById(t.yt)});
- else{const go=u=>{if(curT()===t){a.src=u;a.play().catch(()=>{})}};t.au?auUrl(t.au).then(go):t.ym?ymPlayUrl(t).then(go).catch(()=>{toast('Яндекс Музыка не отвечает. Проверьте подключение в настройках');setTimeout(()=>step(1,true),900)}):go(t.url)}
+ else{const go=u=>{if(curT()===t){a.src=u;a.play().catch(()=>{})}};t.vk?vkUrl(t).then(u=>vkAttach(t,u,go)).catch(()=>{toast('VK Музыка не отвечает. Проверьте токен и шлюз в настройках');setTimeout(()=>step(1,true),900)}):t.au?auUrl(t.au).then(go):t.ym?ymPlayUrl(t).then(go).catch(()=>{toast('Яндекс Музыка не отвечает. Проверьте подключение в настройках');setTimeout(()=>step(1,true),900)}):go(t.url)}
  played=[t.id,...played.filter(x=>x!==t.id)].slice(0,12);taste(t,1);ui();if(mixOn&&Q.length-cur<4)mixFill();if(recQ&&Q.length-cur<4)recMore();if(waveOn&&Q.length-cur<4)waveMore();
  if('mediaSession'in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:t.title,artist:t.artist,album:t.album,artwork:t.yt||t.cover?[{src:t.cover||'https://i.ytimg.com/vi/'+t.yt+'/hqdefault.jpg',sizes:'480x360'}]:[]})}}
 function step(d,auto){if(!Q.length)return;let n=cur+d;
@@ -859,7 +874,8 @@ const tick=()=>{const d=E.duration,c=E.currentTime,p=d?c/d:0;FL.style.transform=
  const x=fmt(c)+'|'+fmt(d);if(x!==lt){lt=x;CU.forEach(e=>e.textContent=fmt(c));TO.forEach(e=>e.textContent=fmt(d))}};
 a.ontimeupdate=tick;setInterval(()=>{if(E===yA&&!yA.paused){tick();const d=yA.duration;if(d>5&&d-yA.currentTime<.4)ended()}},300);
 $$('.seek').forEach(r=>r.oninput=()=>{if(E.duration)E.currentTime=r.value/1000*E.duration;r.parentNode.style.setProperty('--v',r.value/10+'%')});
-$$('.vol').forEach(r=>r.oninput=()=>{a.volume=yA.volume=r.value/100;r.style.setProperty('--v',r.value+'%')});
+const volSet=v=>{a.volume=v/100;yA.volume=v/100;$$('.vol').forEach(o=>{o.value=v;o.style.setProperty('--v',v+'%')})};
+$$('.vol').forEach(r=>r.oninput=()=>{volSet(+r.value);ls.set('vol',+r.value)});volSet(ls.get('vol',100));
 if('mediaSession'in navigator){const m=navigator.mediaSession;m.setActionHandler('play',()=>E.play());m.setActionHandler('pause',()=>E.pause());m.setActionHandler('nexttrack',()=>step(1));m.setActionHandler('previoustrack',()=>step(-1))}
 
 const A={mix,recs:()=>recs(1),cshape:()=>{const e=$('#sheet'),n=(+e.dataset.cs+1)%3;e.dataset.cs=n;ls.set('cs',n)},motion:()=>setMotion(document.documentElement.dataset.motion==='full'?'system':'full'),inst:()=>{ip&&ip.prompt()},theme:()=>go('settings'),
@@ -1000,7 +1016,7 @@ function addDl(t,blob,name,mime){const f=new File([blob],name,{type:blob.type||m
  if(n.cover)fetch(n.cover).then(r=>r.ok?r.blob():null).then(cb=>{if(cb){n.cover=URL.createObjectURL(cb);idb('readwrite',s=>s.put({f,album:'Загрузки',m,cb},key));render()}}).catch(()=>{});
  render()}
 async function dl(t){if(!t||dlS.has(t.key))return;if(isDl(t)){toast('Уже в медиатеке, раздел «Загрузки»');return}
- const local=!t.au&&!t.yt&&!t.ym;dlS.set(t.key,0);paintDl();hap(10);let lp=-1,pv=0;
+ const local=!t.au&&!t.yt&&!t.ym&&!t.vk;dlS.set(t.key,0);paintDl();hap(10);let lp=-1,pv=0;
  const tick=p=>{if(p==null)return;const n=Math.floor(p*10)*10;if(n!==lp){lp=n;toast('Скачиваю: '+n+'%')}};
  try{let blob,mime='';
   if(local)blob=await(await fetch(t.url)).blob();
@@ -1049,28 +1065,30 @@ function renderSettings(){const b=$('#sbody');if(!b)return;b.dataset.ok=1;
   card('Снежинки',tglB('snow','Падающий снег','Лёгкая анимация поверх всего приложения')+(cfg.snow?segB('snowN',[[1,'Мало'],[2,'Средне'],[3,'Много']]):''))+
   card('Значок «в избранное»',segB('fav',[['plus','Плюс'],['heart','Сердце']]))+
   card('Отклик и анимации',tglB('hap','Вибрация','Лёгкий отклик на нажатия, свайпы и долгое нажатие')+`<button class="btn alt full" data-act="motion">${R.motion==='full'?'Анимации: всегда включены':'Анимации: как в настройках системы'}</button>`);
- else if(stab==='bg')h=card('Анимированный фон',`<p class="hint" style="margin-top:0">Фон виден за этими карточками, поэтому изменения заметны сразу.</p>`+segB('bg',[['off','Статичный'],['fluid','Пятна'],['waves','Волны']])+
+ else if(stab==='bg')h=wpCard()+card('Анимированный фон',`<p class="hint" style="margin-top:0">Фон виден за этими карточками, поэтому изменения заметны сразу.</p>`+segB('bg',[['off','Статичный'],['fluid','Пятна'],['waves','Волны']])+
    (cfg.bg!=='off'?tglB('bgCov','Цвета по обложке','Фон подстраивается под играющий трек')+tglB('bgPlay','Двигать только во время музыки','На паузе фон замирает почти полностью')+
    sec('Скорость')+segB('bgSpd',[[1,'Медленно'],[2,'Средне'],[3,'Быстро']])+sec('Насыщенность')+segB('bgInt',[[1,'Мягко'],[2,'Средне'],[3,'Ярко']]):''));
  else if(stab==='feed')h=card('Как строится лента',`<p class="hint" style="margin-top:0">Главный источник — ваше избранное: берутся похожие на него треки и связанные исполнители (с Яндексом это «похожие треки», без него — Audius). Ниже можно добавить свои исполнители и жанры.</p>`)+
+  card('Источники рекомендаций',tglB('ryt','YouTube','Нужен рабочий Piped или свой воркер')+tglB('rym','Яндекс Музыка','Нужно подключение в «Сервисах»')+tglB('rvk','VK Музыка','Нужно подключение в «Сервисах»')+tglB('rau','Audius'))+
   card('Язык треков',segB('rlang',[['fav','По вкусу'],['any','Любой'],['pref','Больше русских'],['ru','Только русские']])+`<p class="hint">«По вкусу» сам выбирает язык по вашему избранному. Исполнители из вашего списка показываются всегда.</p>`)+
   card('Мои исполнители',chipB('rart','Например: Кино'))+
   card('Жанры',`<div class="chb">${GEN.map(g=>`<button class="chip${cfg.rgen.includes(g[0])?' on':''}" data-gn="${g[0]}">${g[1]}</button>`).join('')}</div>`)+
   card('Не показывать',chipB('rban','Имя исполнителя'))+
   card('Объём',`<h4 class="sec">Треков одного исполнителя</h4>`+segB('rcap',[[1,'1'],[2,'2'],[3,'3'],[5,'5']])+`<h4 class="sec">Размер ленты</h4>`+segB('rn',[[10,'10'],[20,'20'],[30,'30']]))+
-  card('Источники и поведение',tglB('rtaste','Учитывать прослушивания','Если избранного мало')+tglB('rau','Audius')+tglB('ryt','YouTube Music','Нужен рабочий Piped или свой воркер')+tglB('rflow','Играть дальше по ленте','После трека включается следующий из ленты')+tglB('rauto','Листать ленту самой','Каждые несколько секунд')+
+  card('Поведение ленты',tglB('rtaste','Учитывать прослушивания','Если избранного мало')+tglB('rflow','Играть дальше по ленте','После трека включается следующий из ленты')+tglB('rauto','Листать ленту самой','Каждые несколько секунд')+
    `<div class="seg two" style="margin-top:10px"><button data-act="rfresh">Обновить ленту</button><button data-act="rtaste0">Сбросить мой вкус</button></div>`);
- else h=ymCard()+
+ else h=ymCard()+vkCard()+
   card('Скачивание',segB('dlTo',[['both','Везде'],['lib','В медиатеку'],['file','Файлом']])+`<p class="hint">В медиатеке трек играет без интернета и лежит в разделе «Загрузки». Файл сохраняется в загрузки телефона. Audius качается напрямую. Для YouTube приложение пробует Cobalt, Piped, затем ищет этот же трек на Audius и в Яндекс Музыке.</p>`)+
   card('Cobalt для YouTube (необязательно)',`<div class="seg two"><button data-act="cobalt">${cfg.cobalt?'Адрес: '+esc(cfg.cobalt.replace(/^https?:\/\//,'').slice(0,18)):'Указать адрес'}</button><button data-act="cobaltk">${cfg.cobaltk?'Ключ задан':'Ключ API'}</button></div>`)+
   card('Поиск по YouTube',`<div class="seg two"><button data-act="sx">Свой воркер</button><button data-act="pipe">Сервер Piped</button></div><button class="btn alt full" data-act="ykey">Ключ YouTube API</button>`);
  b.innerHTML=h}
 const sec=t=>`<h4 class="sec">${t}</h4>`;
 function cfgChanged(k){saveCfg();
- if(['rlang','rart','rgen','rban','rcap','rn','rau','ryt','rtaste'].includes(k))rcStale=1;
+ if(['rlang','rart','rgen','rban','rcap','rn','rau','ryt','rym','rvk','rtaste'].includes(k))rcStale=1;
  if(k==='fav')document.documentElement.dataset.fav=cfg.fav;
  if(k==='snow'||k==='snowN')snow.set();
  if(k==='refr')lgAll();
+ if(k==='wpDim'||k==='wpBlur')wpStyle();
  if(k==='bg'||k==='bgCov'||k==='bgPlay'||k==='bgSpd'||k==='bgInt')bgE.set();
  renderSettings()}
 function addChip(k){const i=$('#in-'+k),v=i?i.value.trim().replace(/\s+/g,' '):'';if(!v)return;if(!cfg[k].some(x=>norm(x)===norm(v)))cfg[k].push(v);cfgChanged(k);const n=$('#in-'+k);n&&n.focus()}
@@ -1170,7 +1188,7 @@ const bgE=(()=>{let cvs,x,w=0,h=0,raf=0,last=0,tm=0,amp=1,spd=1;
    const g2=x.createRadialGradient(w*.5,0,0,w*.5,0,Math.max(w,h)*.75);grad(g2,cur[0],.3*I);x.fillStyle=g2;x.fillRect(0,0,w,h)}
   else BL.forEach(([bx,by,ax,ay,fx,fy,ph,r,ci])=>{const px=(bx+ax*Math.sin(tm*fx*6.283+ph))*w,py=(by+ay*Math.cos(tm*fy*6.283+ph*1.3))*h,rr=r*Math.max(w,h),g=x.createRadialGradient(px,py,0,px,py,rr);
    grad(g,cur[ci],.62*I);x.fillStyle=g;x.fillRect(0,0,w,h)})}
- function loop(now){raf=requestAnimationFrame(loop);if(now-last<33)return;const dt=Math.min(.1,(now-last)/1000);last=now;
+ function loop(now){raf=requestAnimationFrame(loop);if(now-last<33||document.documentElement.dataset.wp)return;const dt=Math.min(.1,(now-last)/1000);last=now;
   const playing=!E.paused&&!!curT(),want=cfg.bgPlay&&!playing?.08:1;amp+=((cfg.bgPlay&&!playing?.3:1)-amp)*.06;spd+=(want-spd)*.05;
   tm+=dt*[0,.5,1,1.9][cfg.bgSpd||2]*spd;
   for(let i=0;i<3;i++)for(let j=0;j<3;j++)cur[i][j]+=(tar[i][j]-cur[i][j])*.045;
@@ -1252,6 +1270,59 @@ Object.assign(A,{
  ymtoken:()=>{const v=prompt('Вставьте OAuth-токен Яндекс Музыки:','');if(v&&v.trim()){cfg.ymTok=v.trim();saveCfg();ymInfo=null;renderSettings();bentoPaint();rcStale=1}},
  ymcheck:()=>{ymInfo=null;renderSettings()},
  ymout:()=>{cfg.ymTok='';ymInfo=null;saveCfg();renderSettings();bentoPaint();rcStale=1}});
+
+/* ================= v8: VK Музыка, свои обои ================= */
+let hls=null,hlsP,vkInfo=null,vkChk=0;
+const vkOn=()=>!!(cfg.vkgw&&cfg.vkTok),vkR=()=>vkOn()&&cfg.rvk,vkBase=()=>String(cfg.vkgw||'').trim().replace(/\/+$/,''),vkItems=r=>Array.isArray(r)?r:(r&&r.items)||[];
+async function vkApi(m,p={}){const r=await fetch(vkBase()+'/vk/api/'+m+'?'+new URLSearchParams({v:'5.131',...p}),{headers:{'X-VK-Token':cfg.vkTok,'X-VK-UA':cfg.vkUa||'kate'}});
+ const j=await r.json().catch(()=>null);if(!j||j.error)throw new Error((j&&j.error&&(j.error.error_msg||j.error.message||j.error))||('VK '+r.status));return j.response}
+const vkMap=x=>{if(!x||!x.id||x.content_restricted)return null;const th=x.album&&x.album.thumb;
+ return{vk:x.owner_id+'_'+x.id+(x.access_key?'_'+x.access_key:''),title:x.title+(x.subtitle?' ('+x.subtitle+')':''),artist:x.artist||'VK',dur:x.duration||0,cover:th&&(th.photo_300||th.photo_270||th.photo_600)||''}};
+const vkSearch=async(q,n=15)=>vkItems(await vkApi('audio.search',{q,count:n,auto_complete:1})).map(vkMap).filter(Boolean);
+const vkReco=async id=>vkItems(await vkApi('audio.getRecommendations',id?{target_audio:String(id).split('_').slice(0,2).join('_'),count:20}:{count:20})).map(vkMap).filter(Boolean);
+async function vkUrl(t){const r=vkItems(await vkApi('audio.getById',{audios:t.vk})),u=r[0]&&r[0].url;if(!u)throw 0;
+ return vkBase()+(/m3u8/.test(u)?'/vk/hls':'/vk/seg')+'?t='+encodeURIComponent(cfg.vkTok)+'&ua='+(cfg.vkUa||'kate')+'&u='+encodeURIComponent(u)}
+const hlsLoad=()=>hlsP||(hlsP=new Promise(r=>{if(window.Hls)return r();const s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js';s.onload=()=>r();s.onerror=()=>{hlsP=0;r()};document.head.append(s)}));
+async function vkAttach(t,u,go){if(curT()!==t)return;if(!/\/vk\/hls\?/.test(u))return go(u);
+ await hlsLoad();if(curT()!==t)return;
+ if(window.Hls&&Hls.isSupported()){hls=new Hls();hls.loadSource(u);hls.attachMedia(a);hls.on(Hls.Events.MANIFEST_PARSED,()=>a.play().catch(()=>{}));
+  hls.on(Hls.Events.ERROR,(e,d)=>{if(d.fatal&&hls&&curT()===t){toast('VK: трек не загрузился. Пропускаю');setTimeout(()=>step(1,true),800)}})}
+ else go(u)}
+async function vkCheck(){try{const u=(await vkApi('users.get'))[0];await vkApi('audio.getCount',{owner_id:u.id});vkInfo={name:u.first_name+' '+u.last_name}}
+ catch(e){vkInfo={err:'VK: '+String(e.message||'нет ответа')}}return vkInfo}
+function vkCard(){const gw=vkBase();let b;
+ if(!gw)b=`<p class="hint">Как и Яндексу, VK нужен свой шлюз на Cloudflare Workers: файл <b>vk-worker.js</b>. Создайте Worker, вставьте код, нажмите Deploy и укажите адрес.</p><div class="srow2">${sbtn('vkgw','Указать адрес шлюза','pri')}</div>`;
+ else{b=`<p class="hint">Шлюз: <b>${esc(gw.replace(/^https?:\/\//,'').slice(0,34))}</b></p>`+
+  (cfg.vkTok?`<p class="hint">${vkInfo?(vkInfo.err?esc(vkInfo.err):'Подключено: <b>'+esc(vkInfo.name)+'</b>'):'Проверяю…'}</p><div class="srow2">${sbtn('vkmy','Моя музыка','pri')}${sbtn('vkcheck','Проверить')}${sbtn('vkout','Выйти')}</div>`:`<div class="srow2">${sbtn('vktoken','Вставить токен','pri')}</div>`)+
+  `<div class="srow2" style="margin-top:8px">${sbtn('vkgw','Изменить адрес шлюза')}${sbtn('vkua','Токен: '+(cfg.vkUa==='official'?'официальный VK':'Kate Mobile'))}</div>`;
+  if(cfg.vkTok&&!vkInfo&&!vkChk){vkChk=1;vkCheck().then(()=>{vkChk=0;if(stab==='svc')renderSettings()})}}
+ return card('VK Музыка',b,'Поиск, ваша музыка и рекомендации, как в VK X. Неофициальный способ: нужен токен аудио-API (Kate Mobile или официальный клиент), VK может его ограничить.')}
+Object.assign(A,{
+ vkgw:()=>{const v=prompt('Адрес шлюза VK (https://имя.аккаунт.workers.dev). Пусто: отключить.',cfg.vkgw||'');if(v===null)return;let u=v.trim().replace(/\/+$/,'');if(u&&!/^https?:\/\//.test(u))u='https://'+u;cfg.vkgw=u;saveCfg();vkInfo=null;renderSettings()},
+ vktoken:()=>{const v=prompt('Вставьте токен VK для аудио (Kate Mobile или официальный клиент):','');if(v&&v.trim()){cfg.vkTok=v.trim();saveCfg();vkInfo=null;renderSettings();rcStale=1}},
+ vkcheck:()=>{vkInfo=null;renderSettings()},vkout:()=>{cfg.vkTok='';saveCfg();vkInfo=null;renderSettings();rcStale=1},
+ vkua:()=>{cfg.vkUa=cfg.vkUa==='official'?'kate':'official';saveCfg();vkInfo=null;renderSettings()},
+ vkmy:async()=>{toast('Загружаю вашу музыку VK…');try{const l=vkItems(await vkApi('audio.get',{count:200})).map(vkMap).filter(Boolean).map(ensure);if(!l.length)throw 0;play(l[0].id,l.map(t=>t.id))}catch{toast('Не удалось загрузить музыку VK. Проверьте токен')}},
+ wpick:()=>$('#wpf').click(),
+ wprm:async()=>{await wpIO('readwrite',s=>s.delete('wp'));cfg.wp=0;saveCfg();wpShow(null);renderSettings()}});
+/* свои обои: картинка, GIF или видео; хранятся в IndexedDB на устройстве */
+const wpDB=new Promise(r=>{try{const q=indexedDB.open('mpwp',1);q.onupgradeneeded=()=>q.result.createObjectStore('s');q.onsuccess=()=>r(q.result);q.onerror=()=>r(null)}catch{r(null)}});
+const wpIO=(m,fn)=>wpDB.then(d=>d?new Promise(res=>{const tx=d.transaction('s',m),r=fn(tx.objectStore('s'));tx.oncomplete=()=>res(r&&r.result);tx.onerror=tx.onabort=()=>res()}):null);
+let wpU='';
+const wpStyle=()=>{const e=$('#wp');if(e){e.style.setProperty('--wd',cfg.wpDim+'%');e.style.setProperty('--wb',cfg.wpBlur+'px')}};
+function wpShow(o){let e=$('#wp');if(wpU){URL.revokeObjectURL(wpU);wpU=''}
+ if(!o||!o.blob){e&&e.remove();delete document.documentElement.dataset.wp;return}
+ if(!e){e=document.createElement('div');e.id='wp';e.setAttribute('aria-hidden','true');document.body.prepend(e)}
+ wpU=URL.createObjectURL(o.blob);const vid=/^video\//.test(o.blob.type);
+ e.innerHTML=vid?`<video src="${wpU}" muted loop autoplay playsinline></video>`:`<img src="${wpU}" alt="">`;
+ if(vid){const v=e.firstChild;v.muted=true;v.play().catch(()=>{})}
+ wpStyle();document.documentElement.dataset.wp=vid?'v':'i'}
+const wpCard=()=>card('Свои обои',`<p class="hint" style="margin-top:0">Картинка, GIF или короткое видео (MP4, WebM). Файл хранится только на этом устройстве и заменяет анимированный фон.</p><div class="srow2">${sbtn('wpick',cfg.wp?'Заменить файл':'Выбрать файл','pri')}${cfg.wp?sbtn('wprm','Убрать'):''}</div>`+
+ (cfg.wp?sec('Затемнение')+segB('wpDim',[[0,'Нет'],[25,'Слабое'],[45,'Среднее'],[65,'Сильное']])+sec('Размытие')+segB('wpBlur',[[0,'Нет'],[6,'Лёгкое'],[16,'Сильное']]):''));
+$('#wpf').onchange=async e=>{const f=e.target.files[0];e.target.value='';if(!f)return;
+ if(!/^(image|video)\//.test(f.type)){toast('Нужна картинка, GIF или видео');return}if(f.size>250e6){toast('Файл больше 250 МБ');return}
+ await wpIO('readwrite',s=>s.put({blob:f},'wp'));cfg.wp=1;saveCfg();wpShow({blob:f});renderSettings();toast('Обои установлены')};
+if(cfg.wp)wpIO('readonly',s=>s.get('wp')).then(o=>wpShow(o));
 
 ui();render();
 const TH=[['violet','Фиалка','#201b23','#e8b9f2'],['rose','Роза','#221a1e','#ffb1cc'],['ocean','Океан','#121b21','#8fd3f4'],['mint','Мята','#131c17','#9fe0b4'],['sunset','Закат','#201915','#ffb87a'],['amoled','AMOLED','#000','#e8b9f2'],['mono','Моно','#151515','#f0f0f0'],['monoblack','Моно AMOLED','#000','#ffffff'],['light','Светлая','#fbf1fb','#7a4189']];
