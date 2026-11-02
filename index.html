@@ -493,6 +493,31 @@ html[data-wp] .amb,html[data-wp] #bg,html[data-wp] #bgn{display:none}
 .vrow input{flex:1}
 input[type=range].vol{--v:100%}
 #sheet{--w:min(72vw,320px,34dvh)}
+
+/* ===== v9: Material 3 Expressive — пружины и плавность ===== */
+:root{--sps:cubic-bezier(.2,.8,.2,1);--em:cubic-bezier(.05,.7,.1,1);--emx:cubic-bezier(.3,0,.8,.15)}
+@supports (transition-timing-function:linear(0,1)){:root{--sp:linear(0,0.025,0.089,0.181,0.288,0.402,0.515,0.623,0.721,0.808,0.882,0.943,0.992,1.028,1.054,1.071,1.08,1.083,1.082,1.077,1.069,1.061,1.051,1.042,1.033,1.024,1.017,1.011,1.005,1.001,0.998,0.996,0.994,0.993,0.993,0.993,0.994,0.994,0.995,0.996,1);--sps:linear(0,0.016,0.057,0.116,0.186,0.264,0.343,0.423,0.499,0.572,0.639,0.699,0.754,0.802,0.844,0.88,0.911,0.936,0.957,0.974,0.988,0.998,1.006,1.012,1.016,1.018,1.02,1.02,1.02,1.019,1.018,1.016,1.015,1.013,1.012,1.01,1.009,1.007,1.006,1.005,1)}}
+#sheet{transition:transform .32s var(--emx),visibility 0s .32s}
+#sheet.open{transition:transform .62s var(--em)}
+#sheet.open>:not(.sx):not(.car){animation:rise .7s var(--sp) both}
+#sheet.open>:nth-child(4){animation-delay:.04s}#sheet.open>:nth-child(5){animation-delay:.08s}#sheet.open>:nth-child(6){animation-delay:.12s}#sheet.open>:nth-child(7){animation-delay:.16s}
+@keyframes rise{from{opacity:0;transform:translateY(28px) scale(.95)}}
+.car.n,.car.p{animation-duration:.65s;animation-timing-function:var(--sps)}
+.pb{transition:transform .45s var(--sp),border-radius .6s var(--sp),width .5s var(--sp)}
+.pb:active{transform:scale(.92);border-radius:28%}
+.hp svg{animation:ipop .55s var(--sp)}
+@keyframes ipop{from{opacity:0;transform:scale(.3) rotate(-80deg)}}
+.ctl .ib,.ctl .pb{transition:width .5s var(--sp),transform .4s var(--sp),border-radius .6s var(--sp),background .2s}
+.ctl .ib:active{transform:none;width:68px}
+.ctl .pb:active{transform:none;width:104px}
+.ctl :active+.ib{width:40px}
+.ctl .ib:has(+ :active){width:40px}
+.ctl :active+.pb{width:66px}
+.wth{transition:height .35s var(--sp),margin .35s var(--sp)}
+.wpat{-webkit-mask-image:var(--flat);mask-image:var(--flat);transition:opacity .4s}
+.pl .wpat:not(.wv2){-webkit-mask-image:var(--flat);mask-image:var(--flat);animation:none;opacity:0}
+.wpat.wv2{-webkit-mask-image:var(--wave);mask-image:var(--wave);opacity:0;scale:1 0;animation:wv .9s linear infinite paused;transition:scale .75s var(--sp),opacity .3s}
+.pl .wpat.wv2{opacity:1;scale:1 1;animation-play-state:running}
 </style>
 </head>
 <body>
@@ -539,7 +564,7 @@ input[type=range].vol{--v:100%}
  <button class="ib d-only" data-act="prev" aria-label="Предыдущий"><i data-i="prev"></i></button>
  <button class="pb hp" data-act="play" aria-label="Играть или пауза"></button>
  <button class="ib" data-act="next" aria-label="Следующий"><i data-i="next"></i></button>
- <div class="d-only mseek"><time class="cur">0:00</time><div class="wv"><div class="wtr"></div><div class="wact"><div class="wpat"></div></div><i class="wth"></i><input class="seek" type="range" min="0" max="1000" value="0" aria-label="Перемотка"></div><time class="tot">0:00</time></div>
+ <div class="d-only mseek"><time class="cur">0:00</time><div class="wv"><div class="wtr"></div><div class="wact"><div class="wpat"></div><div class="wpat wv2"></div></div><i class="wth"></i><input class="seek" type="range" min="0" max="1000" value="0" aria-label="Перемотка"></div><time class="tot">0:00</time></div>
  <div class="d-only mex"><button class="ib" data-act="rep" aria-label="Повтор"><i data-i="repeat"></i></button><button class="ib dlb" data-act="dl" aria-label="Скачать"><i data-i="dlb"></i></button><button class="ib fav" data-act="fav" aria-label="Добавить в избранное"><i data-i="fav"></i></button><i data-i="vol"></i><input class="vol" type="range" min="0" max="100" value="100" aria-label="Громкость"></div>
 </div>
 
@@ -556,7 +581,7 @@ input[type=range].vol{--v:100%}
  <button class="ib glass sx" style="left:auto;right:14px" data-act="cshape" aria-label="Форма обложки"><i data-i="shape"></i></button>
  <div class="car" id="car"></div>
  <div class="srow"><div class="mm"><h2 id="sT"></h2><small id="sA" style="color:var(--mu)"></small></div><div class="sbt"><button class="ib dlb" data-act="dl" aria-label="Скачать"><i data-i="dlb"></i></button><button class="ib fav" data-act="fav" aria-label="Добавить в избранное"><i data-i="fav"></i></button></div></div>
- <div><div class="wv"><div class="wtr"></div><div class="wact"><div class="wpat"></div></div><i class="wth"></i><input class="seek" type="range" min="0" max="1000" value="0" aria-label="Перемотка"></div><div class="srow"><time class="cur">0:00</time><time class="tot">0:00</time></div></div>
+ <div><div class="wv"><div class="wtr"></div><div class="wact"><div class="wpat"></div><div class="wpat wv2"></div></div><i class="wth"></i><input class="seek" type="range" min="0" max="1000" value="0" aria-label="Перемотка"></div><div class="srow"><time class="cur">0:00</time><time class="tot">0:00</time></div></div>
  <div class="ctl"><button class="ib" data-act="shuf" aria-label="Перемешать"><i data-i="shuffle"></i></button><button class="ib" data-act="prev" aria-label="Предыдущий"><i data-i="prev"></i></button><button class="pb hp" data-act="play" aria-label="Играть или пауза"></button><button class="ib" data-act="next" aria-label="Следующий"><i data-i="next"></i></button><button class="ib" data-act="rep" aria-label="Повтор"><i data-i="repeat"></i></button></div>
  <div class="vrow"><i data-i="vol"></i><input class="vol" type="range" min="0" max="100" value="100" aria-label="Громкость"></div>
 </div>
@@ -872,7 +897,7 @@ function step(d,auto){if(!Q.length)return;let n=cur+d;
 function toggleFav(k){hap(12);const x=X.find(t=>t.key===k);if(x&&!T.some(t=>t.key===k)){T.push(x);X=X.filter(t=>t!==x);saveWeb()}const y=T.find(t=>t.key===k);if(y&&!favs.has(k))taste(y,3);favs.has(k)?favs.delete(k):favs.add(k);ls.set('fav',[...favs]);ui();$$('[data-fav]').forEach(b=>{const x=byId(+b.dataset.fav);if(x)b.classList.toggle('on',favs.has(x.key))});if(tab==='fav'&&$('#v-lib').classList.contains('on'))sched()}
 function sheet(o){const s=$('#sheet');s.classList.toggle('open',o);s.setAttribute('aria-hidden',!o);document.body.style.overflow=o?'hidden':''}
 function ui(){const t=curT(),pa=!E.paused&&!!t;if(t!==ui.l){ui.l=t;drawCar(cdir);cdir=0;cdx=0;$$('.row.now').forEach(r=>r.classList.remove('now'));if(t)$$('.row[data-id="'+t.id+'"]').forEach(r=>r.classList.add('now'));markRec();miniCover(t);bgE.track(t)}$('#mini').hidden=!t;$('#mini').classList.toggle('pl',pa);$('#sheet').classList.toggle('pl',pa);
- if('mediaSession'in navigator)navigator.mediaSession.playbackState=pa?'playing':'paused';$$('.hp').forEach(b=>b.innerHTML=ic(pa?'pause':'play'));$$('.mixb').forEach(b=>b.classList.toggle('on',!!mixOn));if(t)$('#sheet').style.setProperty('--h',hue(t));
+ if('mediaSession'in navigator)navigator.mediaSession.playbackState=pa?'playing':'paused';$$('.hp').forEach(b=>{const s=pa?'1':'0';if(b.dataset.pa!==s||!b.firstChild){b.dataset.pa=s;b.innerHTML=ic(pa?'pause':'play')}});ui.k&&ui.k();$$('.mixb').forEach(b=>b.classList.toggle('on',!!mixOn));if(t)$('#sheet').style.setProperty('--h',hue(t));
  if(t){$('#mT').textContent=$('#sT').textContent=t.title;$('#mA').textContent=t.artist;$('#sA').innerHTML=al(t);hsub();document.title=t.title+' · Медиатека'}
  $$('[data-act=fav]').forEach(b=>b.classList.toggle('on',!!t&&favs.has(t.key)));
  $$('[data-act=shuf]').forEach(b=>b.classList.toggle('on',shuf));
@@ -880,11 +905,17 @@ function ui(){const t=curT(),pa=!E.paused&&!!t;if(t!==ui.l){ui.l=t;drawCar(cdir)
 let yDone=0;const ended=()=>{if(E===yA){if(yDone)return;yDone=1}rep===2?(E.currentTime=0,E.play(),yDone=0):step(1,true)};a.onplay=a.onpause=ui;a.onended=ended;a.onerror=()=>{const t=curT();if(t&&t.ym&&!t.px){t.px=1;a.src=ymStream(t.ym);a.play().catch(()=>{});return}if(t&&(t.sc||t.sp)&&t.scx&&!t.px){t.px=1;a.src=t.scx;a.play().catch(()=>{});return}
  if(t&&(t.sc||t.sp)){scBad('Трек SoundCloud не загрузился (код '+(a.error?a.error.code:'?')+')');return}
  if(t&&(t.au||t.ym)){toast((t.ym?'Трек Яндекса':'Трек Audius')+' не загрузился. Пропускаю');setTimeout(()=>step(1,true),800)}};
-const SK=$$('.seek'),CU=$$('.cur'),TO=$$('.tot'),FL=$('#mini>.fill');let sk=0,lt='';
+const SK=$$('.seek'),CU=$$('.cur'),TO=$$('.tot'),FL=$('#mini>.fill');let sk=0,lt='',fr=0;
 SK.forEach(r=>{r.addEventListener('pointerdown',()=>sk=1);r.addEventListener('change',()=>sk=0)});addEventListener('pointerup',()=>sk=0);
-const tick=()=>{const d=E.duration,c=E.currentTime,p=d?c/d:0;FL.style.transform='scaleX('+p+')';
- if(!sk)SK.forEach(r=>{r.value=p*1000;r.parentNode.style.setProperty('--v',p*100+'%')});
+const tick=()=>{const d=E.duration,c=E.currentTime,p=d?c/d:0;if(!fr)FL.style.transform='scaleX('+p+')';
+ if(!sk&&!fr)SK.forEach(r=>{r.value=p*1000;r.parentNode.style.setProperty('--v',p*100+'%')});
  const x=fmt(c)+'|'+fmt(d);if(x!==lt){lt=x;CU.forEach(e=>e.textContent=fmt(c));TO.forEach(e=>e.textContent=fmt(d))}};
+let pxL=-1,pxT=0;const pxFrame=now=>{fr=0;if(E.paused||document.hidden){tick();return}
+ const d=E.duration;if(d>0){const r=E.currentTime;if(r!==pxL){pxL=r;pxT=now}const p=Math.min(d,r+(E===yA?Math.min((now-pxT)/1000,.4):0))/d;
+  FL.style.transform='scaleX('+p+')';if(!sk)SK.forEach(x=>x.parentNode.style.setProperty('--v',p*100+'%'))}
+ fr=requestAnimationFrame(pxFrame)};
+ui.k=()=>{if(!fr&&!E.paused&&!document.hidden)fr=requestAnimationFrame(pxFrame)};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){tick();ui.k()}});
 a.ontimeupdate=tick;setInterval(()=>{if(E===yA&&!yA.paused){tick();const d=yA.duration;if(d>5&&d-yA.currentTime<.4)ended()}},300);
 $$('.seek').forEach(r=>r.oninput=()=>{if(E.duration)E.currentTime=r.value/1000*E.duration;r.parentNode.style.setProperty('--v',r.value/10+'%')});
 const volSet=v=>{a.volume=v/100;yA.volume=v/100;$$('.vol').forEach(o=>{o.value=v;o.style.setProperty('--v',v+'%')})};
@@ -1438,7 +1469,7 @@ function drawCar(dir){const c=$('#car');if(!c||cur<0||!Q.length)return;
  c.addEventListener('pointerdown',e=>{x0=e.clientX;dx=0;c.classList.add('drag');c.classList.remove('n','p');c.setPointerCapture(e.pointerId)});
  c.addEventListener('pointermove',e=>{if(x0===null)return;dx=e.clientX-x0;c.style.transform='translateX('+dx+'px)'});
  const end=()=>{if(x0===null)return;x0=null;c.classList.remove('drag');c.style.transform='';
-  if(Math.abs(dx)>70&&Q.length>1){cdx=dx;step(dx<0?1:-1)}else{c.animate([{transform:'translateX('+dx+'px)'},{transform:'none'}],{duration:300,easing:'cubic-bezier(.2,.8,.2,1)'})}};
+  if(Math.abs(dx)>70&&Q.length>1){cdx=dx;step(dx<0?1:-1)}else{c.animate([{transform:'translateX('+dx+'px)'},{transform:'none'}],{duration:600,easing:getComputedStyle(document.documentElement).getPropertyValue('--sps').trim()||'ease-out'})}};
  c.addEventListener('pointerup',end);c.addEventListener('pointercancel',end)})();
 let ip;addEventListener('beforeinstallprompt',e=>{e.preventDefault();ip=e;$$('[data-act=inst]').forEach(b=>b.hidden=false)});
 addEventListener('appinstalled',()=>$$('[data-act=inst]').forEach(b=>b.hidden=true));
