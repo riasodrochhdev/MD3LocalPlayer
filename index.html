@@ -518,6 +518,33 @@ input[type=range].vol{--v:100%}
 .pl .wpat:not(.wv2){-webkit-mask-image:var(--flat);mask-image:var(--flat);animation:none;opacity:0}
 .wpat.wv2{-webkit-mask-image:var(--wave);mask-image:var(--wave);opacity:0;scale:1 0;animation:wv .9s linear infinite paused;transition:scale .75s var(--sp),opacity .3s}
 .pl .wpat.wv2{opacity:1;scale:1 1;animation-play-state:running}
+
+/* ===== v10: фикс полоски + сжатие в навбаре и мини-плеере ===== */
+/* заливка больше не меняет размер слоя с маской 60 раз в секунду: слой на всю ширину, открывается через clip-path */
+.wact{width:100%;clip-path:inset(0 calc(100% - var(--v)) 0 0)}
+/* волна сначала выпрямляется, и только потом перетекает в прямую */
+.wpat{transition:opacity .2s .35s}
+.pl .wpat:not(.wv2){transition:opacity .15s}
+.wpat.wv2{transition:scale .6s var(--sp),opacity .2s .35s}
+.pl .wpat.wv2{transition:scale .75s var(--sp),opacity .15s}
+/* навбар: нажатая вкладка расширяется, соседи сжимаются (через scale, чтобы не ломать расчёт «капли») */
+#nav button{--sx:1;scale:var(--sx) 1;transition:background .35s var(--ease),color .3s,transform .3s var(--sp),scale .5s var(--sp)}
+#nav button>svg,#nav button>i{scale:calc(1/var(--sx)) 1;transition:scale .5s var(--sp)}
+#nav span{transition:max-width .4s var(--ease),opacity .3s,scale .5s var(--sp)}
+#nav button span{scale:calc(1/var(--sx)) 1}
+#nav button:active{transform:none;--sx:1.14}
+#nav button:active+button{--sx:.88}
+#nav button:has(+ button:active){--sx:.88}
+#nav:has(.on:active) .np{scale:1.14 1}
+#nav:has(.on+button:active) .np,#nav:has(button:active+.on) .np{scale:.88 1}
+/* мини-плеер: то же сжатие у кнопок */
+.mini .ib,.mini .pb{transition:width .5s var(--sp),transform .4s var(--sp),border-radius .6s var(--sp),background .2s}
+.mini .ib:active{transform:none;width:60px}
+.mini .pb:active{transform:none;width:78px}
+.mini button:active+.ib{width:40px}
+.mini .ib:has(+ button:active){width:40px}
+.mini button:active+.pb{width:46px}
+.mini .pb:has(+ button:active){width:46px}
 </style>
 </head>
 <body>
@@ -910,9 +937,9 @@ SK.forEach(r=>{r.addEventListener('pointerdown',()=>sk=1);r.addEventListener('ch
 const tick=()=>{const d=E.duration,c=E.currentTime,p=d?c/d:0;if(!fr)FL.style.transform='scaleX('+p+')';
  if(!sk&&!fr)SK.forEach(r=>{r.value=p*1000;r.parentNode.style.setProperty('--v',p*100+'%')});
  const x=fmt(c)+'|'+fmt(d);if(x!==lt){lt=x;CU.forEach(e=>e.textContent=fmt(c));TO.forEach(e=>e.textContent=fmt(d))}};
-let pxL=-1,pxT=0;const pxFrame=now=>{fr=0;if(E.paused||document.hidden){tick();return}
- const d=E.duration;if(d>0){const r=E.currentTime;if(r!==pxL){pxL=r;pxT=now}const p=Math.min(d,r+(E===yA?Math.min((now-pxT)/1000,.4):0))/d;
-  FL.style.transform='scaleX('+p+')';if(!sk)SK.forEach(x=>x.parentNode.style.setProperty('--v',p*100+'%'))}
+let pxL=-1,pxT=0,hS=0,hP=0;SK.forEach(r=>r.addEventListener('input',()=>{hS=performance.now();hP=r.value/1000}));const pxFrame=now=>{fr=0;if(E.paused||document.hidden){tick();return}
+ const d=E.duration;if(d>0){const r=E.currentTime;if(r!==pxL){pxL=r;pxT=now}let p=Math.min(d,r+(E===yA?Math.min((now-pxT)/1000,.4):0))/d;if(E===yA&&hS&&now-hS<700)p=Math.min(1,hP+Math.max(0,now-hS)/1000/d);
+  FL.style.transform='scaleX('+p+')';if(!sk)SK.forEach(x=>{x.value=p*1000;x.parentNode.style.setProperty('--v',p*100+'%')})}
  fr=requestAnimationFrame(pxFrame)};
 ui.k=()=>{if(!fr&&!E.paused&&!document.hidden)fr=requestAnimationFrame(pxFrame)};
 document.addEventListener('visibilitychange',()=>{if(!document.hidden){tick();ui.k()}});
