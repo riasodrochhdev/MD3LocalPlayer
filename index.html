@@ -545,6 +545,40 @@ input[type=range].vol{--v:100%}
 .mini .ib:has(+ button:active){width:40px}
 .mini button:active+.pb{width:46px}
 .mini .pb:has(+ button:active){width:46px}
+
+/* ===== v11 · M3 Expressive: единая волна, группы кнопок со сжатием, громкость ===== */
+.wv{height:36px}
+.wact,.wv::before{display:none!important}
+.wsv{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;color:var(--p)}
+.wsv path{fill:none;stroke:currentColor;stroke-width:4;stroke-linecap:round}
+.wvl{position:absolute;left:var(--v);bottom:calc(100% - 4px);padding:3px 10px;border-radius:12px;background:var(--p);color:var(--onp);font-size:.74rem;font-weight:600;font-variant-numeric:tabular-nums;pointer-events:none;z-index:3;opacity:0;transform:translateX(-50%) scale(.5);transform-origin:50% 100%;transition:transform .35s var(--sp),opacity .15s}
+.wv.drag .wvl{opacity:1;transform:translateX(-50%) scale(1)}
+.mini .wvl{display:none}
+.bg{display:contents}
+@media(min-width:900px){
+ .mini{width:min(1120px,calc(100% - 40px));height:64px;padding:8px 18px 8px 10px;gap:14px;border-radius:32px}
+ .mcv{width:48px;height:48px}
+ .mm{flex:0 1 210px;min-width:120px}
+ .mseek{flex:1 1 260px;min-width:200px;max-width:none}
+ .mex{gap:8px}
+ .bg{display:flex;align-items:center;gap:2px;flex:none}
+ .bg.l{width:208px}.bg.r{width:132px}
+ .mini .bg>button{--b:1;--m:1;flex:calc(var(--b)*var(--m)) 1 0;width:auto!important;min-width:0;height:44px;transform:none!important;border-radius:9px;background:color-mix(in srgb,var(--onpc) 9%,transparent);transition:flex-grow .45s var(--sp),border-radius .5s var(--sp),background .2s}
+ .mini .bg>button:hover{background:color-mix(in srgb,var(--onpc) 16%,transparent)}
+ .mini .bg>button:first-child{border-radius:22px 9px 9px 22px}
+ .mini .bg>button:last-child{border-radius:9px 22px 22px 9px}
+ .mini .bg>.pb{--b:1.75;height:48px;border-radius:24px;background:var(--p)}
+ .mini .bg>button:active+button,.mini .bg>button:has(+button:active){--m:.82}
+ .mini .bg>button:active{--m:1.3;border-radius:22px}
+ .mini .bg>.pb svg{width:24px;height:24px}
+ .mex .vb{width:36px;height:36px}
+ .mex .vol{-webkit-appearance:none;appearance:none;width:108px;height:28px;margin:0;background:transparent;cursor:pointer;--vg:linear-gradient(90deg,var(--p) 0 max(7px,calc(var(--v) - 4px)),transparent 0 calc(var(--v) + 4px),color-mix(in srgb,var(--onpc) 22%,transparent) 0)}
+ .mex .vol::-webkit-slider-runnable-track{height:14px;border-radius:7px;background:var(--vg)}
+ .mex .vol::-webkit-slider-thumb{-webkit-appearance:none;width:4px;height:28px;margin-top:-7px;border-radius:2px;background:var(--p)}
+ .mex .vol::-moz-range-track{height:14px;border-radius:7px;background:var(--vg)}
+ .mex .vol::-moz-range-progress{background:transparent}
+ .mex .vol::-moz-range-thumb{width:4px;height:28px;border:0;border-radius:2px;background:var(--p)}
+}
 </style>
 </head>
 <body>
@@ -587,12 +621,9 @@ input[type=range].vol{--v:100%}
  <div class="fill"></div>
  <button class="mcv" id="mCov" data-act="open" aria-label="Открыть плеер"><i data-i="note"></i></button>
  <div class="mm" data-act="open" style="cursor:pointer"><b id="mT"></b><small id="mA"></small></div>
- <button class="ib d-only" data-act="shuf" aria-label="Перемешать"><i data-i="shuffle"></i></button>
- <button class="ib d-only" data-act="prev" aria-label="Предыдущий"><i data-i="prev"></i></button>
- <button class="pb hp" data-act="play" aria-label="Играть или пауза"></button>
- <button class="ib" data-act="next" aria-label="Следующий"><i data-i="next"></i></button>
+ <div class="bg l"><button class="ib d-only" data-act="shuf" aria-label="Перемешать"><i data-i="shuffle"></i></button><button class="ib d-only" data-act="prev" aria-label="Предыдущий"><i data-i="prev"></i></button><button class="pb hp" data-act="play" aria-label="Играть или пауза"></button><button class="ib" data-act="next" aria-label="Следующий"><i data-i="next"></i></button></div>
  <div class="d-only mseek"><time class="cur">0:00</time><div class="wv"><div class="wtr"></div><div class="wact"><div class="wpat"></div><div class="wpat wv2"></div></div><i class="wth"></i><input class="seek" type="range" min="0" max="1000" value="0" aria-label="Перемотка"></div><time class="tot">0:00</time></div>
- <div class="d-only mex"><button class="ib" data-act="rep" aria-label="Повтор"><i data-i="repeat"></i></button><button class="ib dlb" data-act="dl" aria-label="Скачать"><i data-i="dlb"></i></button><button class="ib fav" data-act="fav" aria-label="Добавить в избранное"><i data-i="fav"></i></button><i data-i="vol"></i><input class="vol" type="range" min="0" max="100" value="100" aria-label="Громкость"></div>
+ <div class="d-only mex"><div class="bg r"><button class="ib" data-act="rep" aria-label="Повтор"><i data-i="repeat"></i></button><button class="ib dlb" data-act="dl" aria-label="Скачать"><i data-i="dlb"></i></button><button class="ib fav" data-act="fav" aria-label="Добавить в избранное"><i data-i="fav"></i></button></div><button class="ib vb" data-act="mute" aria-label="Без звука"><i data-i="vol"></i></button><input class="vol" type="range" min="0" max="100" value="100" aria-label="Громкость"></div>
 </div>
 
 <nav id="nav" class="glass" aria-label="Разделы">
@@ -947,6 +978,24 @@ a.ontimeupdate=tick;setInterval(()=>{if(E===yA&&!yA.paused){tick();const d=yA.du
 $$('.seek').forEach(r=>r.oninput=()=>{if(E.duration)E.currentTime=r.value/1000*E.duration;r.parentNode.style.setProperty('--v',r.value/10+'%')});
 const volSet=v=>{a.volume=v/100;yA.volume=v/100;$$('.vol').forEach(o=>{o.value=v;o.style.setProperty('--v',v+'%')})};
 $$('.vol').forEach(r=>r.oninput=()=>{volSet(+r.value);ls.set('vol',+r.value)});volSet(ls.get('vol',100));
+/* M3E: волнистый ползунок — один путь, амплитуда плавно растёт при play и гаснет на паузе */
+(()=>{const NS='http://www.w3.org/2000/svg',LAM=36,GAP=8,K=2*Math.PI/LAM,rm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+ const O=$$('.wv').map(w=>{const s=document.createElementNS(NS,'svg'),p=document.createElementNS(NS,'path'),l=document.createElement('span');s.setAttribute('class','wsv');s.setAttribute('aria-hidden','true');s.appendChild(p);l.className='wvl';w.insertBefore(s,w.firstChild);w.appendChild(l);
+  const r=w.querySelector('.seek'),sh=()=>{if(E.duration)l.textContent=fmt(r.value/1000*E.duration)};
+  r.addEventListener('pointerdown',()=>{w.classList.add('drag');sh()});r.addEventListener('input',()=>{sh();kick()});
+  ['pointerup','pointercancel','change','blur'].forEach(e=>r.addEventListener(e,()=>w.classList.remove('drag')));
+  return{w,p,amp:0,k:''}});
+ let ph=0,lt=0,run=0;
+ const paint=(o,pl)=>{const w=o.w,Wd=w.offsetWidth,H=w.offsetHeight,v=parseFloat(w.style.getPropertyValue('--v'))||0,k=v.toFixed(2)+'|'+Wd+'|'+o.amp.toFixed(2)+(o.amp?'|'+ph.toFixed(2):'');if(k===o.k)return;o.k=k;
+  const m=H/2,x1=Wd*v/100-GAP;if(x1<=0){o.p.setAttribute('d','M0 '+m+'h.01');return}
+  let d='M0 '+(m+o.amp*Math.sin(-ph));for(let x=2;x<x1;x+=2)d+='L'+x+' '+(m+o.amp*Math.sin(x*K-ph)).toFixed(2);d+='L'+x1+' '+(m+o.amp*Math.sin(x1*K-ph)).toFixed(2);o.p.setAttribute('d',d)};
+ const loop=t=>{run=1;const dt=Math.min(64,lt?t-lt:16);lt=t;let busy=0;
+  O.forEach(o=>{if(!o.w.offsetWidth)return;const pl=!rm&&!!o.w.closest('.pl'),A=o.w.closest('#sheet')?4:3,tg=pl?A:0;o.amp+=(tg-o.amp)*(1-Math.exp(-dt/120));if(Math.abs(tg-o.amp)<.02)o.amp=tg;if(pl||o.amp)busy=1;paint(o)});
+  ph+=dt*.0052;
+  if(busy&&!document.hidden)requestAnimationFrame(loop);else{lt=0;run=0;setTimeout(kick,180)}};
+ const kick=()=>{if(!run){run=1;requestAnimationFrame(loop)}};
+ kick();document.addEventListener('visibilitychange',kick);
+})();
 if('mediaSession'in navigator){const m=navigator.mediaSession;m.setActionHandler('play',()=>E.play());m.setActionHandler('pause',()=>E.pause());m.setActionHandler('nexttrack',()=>step(1));m.setActionHandler('previoustrack',()=>step(-1))}
 
 const A={mix,recs:()=>recs(1),cshape:()=>{const e=$('#sheet'),n=(+e.dataset.cs+1)%3;e.dataset.cs=n;ls.set('cs',n)},motion:()=>setMotion(document.documentElement.dataset.motion==='full'?'system':'full'),inst:()=>{ip&&ip.prompt()},theme:()=>go('settings'),
@@ -1335,7 +1384,7 @@ Object.assign(A,{
  aback:()=>{history.state&&history.state.k==='a'?history.back():go(navV)},
  aplay:()=>artPlay(0),ashuf:()=>artPlay(1),
  abio:()=>{if(artS){artS.bo=!artS.bo;ra()}},aall:()=>{if(artS){artS.all=1;ra()}},
- wave:waveStart,
+ wave:waveStart,mute:()=>{const v=+$('.vol').value;if(v>0){volSet.p=v;volSet(0);ls.set('vol',0)}else{const n=volSet.p||60;volSet(n);ls.set('vol',n)}},
  ymgw:()=>{const v=prompt('Адрес вашего шлюза (https://имя.аккаунт.workers.dev). Пусто: отключить.',cfg.ymgw||'');if(v===null)return;let u=v.trim().replace(/\/+$/,'');if(u&&!/^https?:\/\//.test(u))u='https://'+u;cfg.ymgw=u;saveCfg();ymInfo=null;renderSettings();bentoPaint()},
  ymlogin:ymLogin,
  ymcancel:()=>{ymLg=null;renderSettings()},
